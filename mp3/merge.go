@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
-	"log"
+	"fmt"
 	"net/url"
 	"path/filepath"
 	"strconv"
@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/grafov/m3u8"
 	"github.com/imthaghost/scdl/decrypt"
 	"github.com/imthaghost/scdl/joiner"
@@ -28,7 +29,7 @@ var (
 )
 
 func start(mpl *m3u8.MediaPlaylist) {
-	p := pool.New(10, download)
+	p := pool.New(5, download)
 
 	go func() {
 		var count = int(mpl.Count())
@@ -126,11 +127,13 @@ func download(in interface{}) {
 
 	statusCode, data, err := ZHTTP.Get(segment.URI)
 	if err != nil {
-		log.Fatalln("[-] Download failed:", err)
+		red := color.New(color.FgRed).SprintFunc()
+		fmt.Printf("%s Download failed: %s\n", red("[-]"), err)
 	}
 
 	if len(data) == 0 {
-		log.Fatalln("[-] Download failed: body is empty, http code:", statusCode)
+		red := color.New(color.FgRed).SprintFunc()
+		fmt.Printf("%s Download failed: body is empty, http code: %d\n", red("[-]"), statusCode)
 	}
 
 	var keyURL, ivStr string
@@ -146,13 +149,13 @@ func download(in interface{}) {
 		var key, iv []byte
 		key, err = getKey(keyURL)
 		if err != nil {
-			log.Fatalln("[-] Download key failed:", keyURL, err)
+			fmt.Println("[-] Download key failed:", keyURL, err)
 		}
 
 		if ivStr != "" {
 			iv, err = hex.DecodeString(strings.TrimPrefix(ivStr, "0x"))
 			if err != nil {
-				log.Fatalln("[-] Decode iv failed:", err)
+				fmt.Println("[-] Decode iv failed:", err)
 			}
 		} else {
 			iv = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, byte(id)}
@@ -160,7 +163,8 @@ func download(in interface{}) {
 
 		data, err = decrypt.Decrypt(data, key, iv)
 		if err != nil {
-			log.Fatalln("[-] Decrypt failed:", err)
+			red := color.New(color.FgRed).SprintFunc()
+			fmt.Printf("%s Decrypt failed: %s\n", red("[-]"), err)
 		}
 	}
 
@@ -196,34 +200,43 @@ func Merge(url string, songname string) {
 	var err error
 	ZHTTP, err = zhttp.New(time.Second*30, "")
 	if err != nil {
-		log.Fatalln("[-] Init failed:", err)
+		red := color.New(color.FgRed).SprintFunc()
+		fmt.Printf("%s Init failed: %s\n", red("[-]"), err)
 	}
 
 	mpl, err := parseM3u8(url)
 	if err != nil {
-		log.Fatalln("[-] Parse m3u8 file failed:", err)
+		red := color.New(color.FgRed).SprintFunc()
+		fmt.Printf("%s Parse m3u8 file failed: %s\n", red("[-]"), err)
 	} else {
-		log.Println("[+] Parse m3u8 file succed")
+		green := color.New(color.FgGreen).SprintFunc()
+		fmt.Printf("%s Parse m3u8 file succed %s\n", green("[+]"), "")
 	}
 
 	outFile := songname + ".mp3"
 
 	JOINER, err = joiner.New(outFile)
 	if err != nil {
-		log.Fatalln("[-] Open file failed:", err)
+		red := color.New(color.FgRed).SprintFunc()
+		fmt.Printf("%s Open file failed: %s\n", red("[-]"), err)
 	} else {
-		log.Println("[+] Will save to", JOINER.Name())
+		green := color.New(color.FgGreen).SprintFunc()
+		fmt.Printf("%s Will save to %s\n", green("[+]"), JOINER.Name())
 	}
 
 	if mpl.Count() > 0 {
-		log.Println("[+] Total", mpl.Count(), "files to download")
+		green := color.New(color.FgGreen).SprintFunc()
+		fmt.Printf("%s Total %d files to download \n", green("[+]"), mpl.Count())
 
 		start(mpl)
 
 		err = JOINER.Run(int(mpl.Count()))
 		if err != nil {
-			log.Fatalln("[-] Write to file failed:", err)
+			red := color.New(color.FgRed).SprintFunc()
+			fmt.Printf("%s Write to file failed: %s\n", red("[-]"), err)
 		}
-		log.Println("[+] Download succed, saved to", JOINER.Name())
+		g := color.New(color.FgGreen).SprintFunc()
+		fmt.Printf("%s Download succed, saved to %s\n", g("[+]"), JOINER.Name())
+
 	}
 }
