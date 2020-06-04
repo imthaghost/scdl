@@ -1,4 +1,0 @@
-cbde101ef7393b25277efdba8cdf34161984205e5290fc40499c4d17c5a9d51d  scdl_v0.0.0-next_Linux-32bit.tar.gz
-d66e8bdbe790f113f55e73cd88f8de8264acaf338be13c8ea9cd7ee262a86914  scdl_v0.0.0-next_Linux-64bit.tar.gz
-3d03de3f8ffa895ee173c0742e9a1cf9ab779bf00c4d2bdb4a406536725c67f6  scdl_v0.0.0-next_macOS-32bit.tar.gz
-327232c55df4742292febdb3a32a67a2b6866c3211d0b7407f3e22e619381dfa  scdl_v0.0.0-next_macOS-64bit.tar.gz
