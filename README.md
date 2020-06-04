@@ -46,12 +46,12 @@ go install
 ### Short term
 
 -   [x] Cobra command line interface
--   [x] Pull all audio files from Soundcloud song instance
--   [ ] Merge multiple audio files into one .mp3 file
--   [x] --artwork flag to download artwork image
--   [ ] installation via Brew
+-   [x] Download audio file from Soundcloud URL
+-   [x] Goroutine pool for downloading m3u8 file
+-   [x] installation via Brew
 -   [x] Update tool for better performance
-
+-   [x] --artwork flag to download artwork image
+-   [ ] --Mp3 file contains cover and title metadata
 ### Long term
 
 -   [ ] Download all songs from a given playlist
