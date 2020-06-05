@@ -43,7 +43,7 @@ go install
 
 ### Binary
 
-<a href="https://www.mediafire.com/file/ynkvkaoo4rvvv4v/scdl/file">
+[Download Here](https://www.mediafire.com/file/ynkvkaoo4rvvv4v/scdl/file)
 
 ## Todo
 
