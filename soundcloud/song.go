@@ -18,8 +18,7 @@ var clientID = "iY8sfHHuO2UsXy1QOlxthZoMJEY9v0eI" // anonymous user clientID wil
 
 // ExtractSong queries the SoundCloud api and receives a file with urls
 func ExtractSong(url string) {
-	// v1 grabs song name from url
-	songname := GetSongName(url)
+
 	// request to soundcloud url
 	resp, err := http.Get(url)
 	if err != nil {
@@ -30,6 +29,11 @@ func ExtractSong(url string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	// song name
+	songname := GetTitle(body)
+	// artwork url
+	//artworkURL := GetArtwork(body)
+
 	// TODO improve pattern for finding encrypted string ID
 	var re = regexp.MustCompile(`https:\/\/api-v2.*\/stream\/hls`) // pattern for finding encrypted string ID
 	// TODO not needed if encrypted string ID regex pattern is improved
@@ -63,9 +67,4 @@ func ExtractSong(url string) {
 	// merege segments
 	mp3.Merge(a.URL, songname)
 
-}
-
-// function for retrieving a new client_id upon request
-func dynamicClientID(data []byte) string {
-	return "new client_id"
 }
