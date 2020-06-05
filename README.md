@@ -53,9 +53,8 @@ go install
 -   [x] Download audio file from Soundcloud URL
 -   [x] Goroutine pool for downloading m3u8 file
 -   [x] Installation via Brew
--   [x] Update tool for better performance
--   [x] --artwork flag to download artwork image
--   [ ] Mp3 file contains cover and title metadata
+-   [ ] Mp3 file contains image cover
+-   [ ] Update tool for better performance
 ### Long term
 
 -   [ ] Download all songs from a given playlist
