@@ -41,6 +41,10 @@ cd $GOPATH/src/github.com/imthaghost/scdl
 go install
 ```
 
+### Binary
+
+> ![Download Binary](https://www.mediafire.com/file/ynkvkaoo4rvvv4v/scdl/file)
+
 ## Todo
 
 ### Short term
@@ -48,10 +52,10 @@ go install
 -   [x] Cobra command line interface
 -   [x] Download audio file from Soundcloud URL
 -   [x] Goroutine pool for downloading m3u8 file
--   [x] installation via Brew
+-   [x] Installation via Brew
 -   [x] Update tool for better performance
 -   [x] --artwork flag to download artwork image
--   [ ] --Mp3 file contains cover and title metadata
+-   [ ] Mp3 file contains cover and title metadata
 ### Long term
 
 -   [ ] Download all songs from a given playlist
