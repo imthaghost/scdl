@@ -216,6 +216,7 @@ func Merge(url string, songname string) {
 	outFile := songname + ".mp3"
 
 	JOINER, err = joiner.New(outFile)
+
 	if err != nil {
 		red := color.New(color.FgRed).SprintFunc()
 		fmt.Printf("%s Open file failed: %s\n", red("[-]"), err)

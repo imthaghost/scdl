@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/bogem/id3v2"
 	"github.com/imthaghost/scdl/mp3"
 )
 
@@ -32,8 +33,16 @@ func ExtractSong(url string) {
 	// song name
 	songname := GetTitle(body)
 	// artwork url
-	//artworkURL := GetArtwork(body)
-
+	artworkURL := GetArtwork(body)
+	// request to soundcloud url
+	artworkresp, err := http.Get(artworkURL)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	image, err := ioutil.ReadAll(artworkresp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	// TODO improve pattern for finding encrypted string ID
 	var re = regexp.MustCompile(`https:\/\/api-v2.*\/stream\/hls`) // pattern for finding encrypted string ID
 	// TODO not needed if encrypted string ID regex pattern is improved
@@ -67,4 +76,18 @@ func ExtractSong(url string) {
 	// merege segments
 	mp3.Merge(a.URL, songname)
 
+	tag, err := id3v2.Open(songname+".mp3", id3v2.Options{Parse: true})
+	if tag == nil || err != nil {
+		log.Fatal("Error while opening mp3 file: ", err)
+	}
+
+	pic := id3v2.PictureFrame{
+		Encoding:    id3v2.EncodingUTF8,
+		MimeType:    "image/jpeg",
+		PictureType: id3v2.PTFrontCover,
+		Description: "Front cover",
+		Picture:     image,
+	}
+	tag.AddAttachedPicture(pic)
+	tag.Save()
 }
