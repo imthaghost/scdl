@@ -22,7 +22,8 @@ import (
 
 var (
 	// ZHTTP client
-	ZHTTP        *zhttp.Zhttp
+	ZHTTP *zhttp.Zhttp
+	// JOINER client
 	JOINER       *joiner.Joiner
 	keyCache     map[string][]byte
 	keyCacheLock sync.Mutex

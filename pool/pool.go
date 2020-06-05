@@ -25,7 +25,7 @@ func (c *HackPool) Push(data interface{}) {
 	c.messages <- data
 }
 
-// CloseQueue
+// CloseQueue ...
 func (c *HackPool) CloseQueue() {
 	close(c.messages)
 }
