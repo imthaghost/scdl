@@ -10,7 +10,7 @@ Scdl is the fastest SoundCloud music downloading CLI tool. Scdl utilizes go rout
 </p>
 <br>
 
-![Download](/docs/media/poster.gif)
+![Download](/docs/media/v2.gif)
 
 ## Table of Contents
 
@@ -53,7 +53,7 @@ go install
 -   [x] Download audio file from Soundcloud URL
 -   [x] Goroutine pool for downloading m3u8 file
 -   [x] Installation via Brew
--   [ ] Mp3 file contains image cover
+-   [x] Mp3 file contains image cover
 -   [ ] Update tool for better performance
 ### Long term
 
