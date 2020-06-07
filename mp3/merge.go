@@ -30,7 +30,7 @@ var (
 )
 
 func start(mpl *m3u8.MediaPlaylist) {
-	p := pool.New(5, download)
+	p := pool.New(10, download)
 
 	go func() {
 		var count = int(mpl.Count())

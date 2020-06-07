@@ -15,7 +15,7 @@ type audioLink struct {
 	URL string `json:"url"`
 }
 
-var clientID = "iY8sfHHuO2UsXy1QOlxthZoMJEY9v0eI" // anonymous user clientID will be static in v1
+// var clientID = "iY8sfHHuO2UsXy1QOlxthZoMJEY9v0eI" // anonymous user clientID will be static in v1
 
 // ExtractSong queries the SoundCloud api and receives a file with urls
 func ExtractSong(url string) {
@@ -34,6 +34,9 @@ func ExtractSong(url string) {
 	songname := GetTitle(body)
 	// artwork url
 	artworkURL := GetArtwork(body)
+
+	clientID := GetClientID(body)
+
 	// request to soundcloud url
 	artworkresp, err := http.Get(artworkURL)
 	if err != nil {
