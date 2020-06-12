@@ -1,7 +1,10 @@
 package soundcloud
 
 import (
+	// "bytes"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
+
 )
 
 // Search returns the first URL on SoundCloud most similar to the user input
@@ -9,6 +12,7 @@ func Search(query string) string {
 	base := "https://soundcloud.com/search?q=%s"
 	searchQueryString := fmt.Sprintf(base, query)
 	// TODO: implement return url
+
 	return searchQueryString
 }
 
@@ -16,9 +20,6 @@ func Search(query string) string {
 func isSong(url string) bool {
 	// TODO: implement
 
-	if url != searchQueryString {
-		return false
-	}
-	
+
 	return true
 }
