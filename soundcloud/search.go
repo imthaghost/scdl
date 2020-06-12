@@ -15,5 +15,10 @@ func Search(query string) string {
 // isSong looks at a given SoundCloud URL and determine if the URL is a song or not
 func isSong(url string) bool {
 	// TODO: implement
+
+	if url != searchQueryString {
+		return false
+	}
+	
 	return true
 }
