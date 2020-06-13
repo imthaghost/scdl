@@ -3,7 +3,7 @@ package soundcloud
 import (
 	// "bytes"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
+	// "github.com/PuerkitoBio/goquery"
 
 )
 
@@ -13,6 +13,11 @@ func Search(query string) string {
 	searchQueryString := fmt.Sprintf(base, query)
 	// TODO: implement return url
 
+	searchFlg := flag.String("searchFlg", "", "flag for the search function")
+	flag.Parse()
+
+	fmt.Println(searchFlg)
+
 	return searchQueryString
 }
 
@@ -20,6 +25,4 @@ func Search(query string) string {
 func isSong(url string) bool {
 	// TODO: implement
 
-
-	return true
 }
