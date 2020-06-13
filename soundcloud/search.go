@@ -70,12 +70,20 @@ func isSong(url string) bool {
 	// 	panic(err)
 	// }
 
-	var re = regexp.MustComplete("([^\/]*)$")
+	var re = regexp.MustComplete(`([^\/]*)$`)
 
 	name, err := re.Find(url)
 	if err != nil {
 		panic(err)
 	}
+	// doc.Find("meta[property='twitter:title']").Each(func(i int, s *goquery.Selection) {
+	// 	// get the data from found element's content attribute
+	// 	song, exists := s.Attr("content")
+	// 	if exists {
+	// 		title = song
+
+	// 	}
+	// })
 	
 	return false
 }
