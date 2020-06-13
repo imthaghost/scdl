@@ -44,10 +44,7 @@ func Search(query string) string {
 	fmt.Println(urls)
 	// TODO: implement return url
 
-	searchFlg := flag.String("searchFlg", "", "flag for the search function")
-	flag.Parse()
 
-	fmt.Println(searchFlg)
 
 	return searchQueryString
 }
