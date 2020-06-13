@@ -46,11 +46,13 @@ func Search(query string) string {
 	})
 	fmt.Println(urls)
 	// TODO: implement return url
+
 	return searchQueryString
 }
 
 // isSong looks at a given SoundCloud URL and determine if the URL is a song or not
 func isSong(url string) bool {
 	// TODO: implement
+
 	return true
 }
