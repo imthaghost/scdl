@@ -15,37 +15,41 @@ type audioLink struct {
 	URL string `json:"url"`
 }
 
-// var clientID = "iY8sfHHuO2UsXy1QOlxthZoMJEY9v0eI" // anonymous user clientID will be static in v1
-
-// ExtractSong queries the SoundCloud api and receives a file with urls
+// ExtractSong queries the SoundCloud api and receives a m3u8 file, then binds the segments received into a .mp3 file
 func ExtractSong(url string) {
 
-	// request to soundcloud url
+	// request to user inputed SoundCloud URL
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	// response body
+	// response
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	// song name
+
+	// parse the response data to grab the song name
 	songname := GetTitle(body)
-	// artwork url
+
+	// parse the response data to grab the artwork URL
 	artworkURL := GetArtwork(body)
 
+	// parse the response data and make a reqeust to recieve clien_id embeded in the javascript
 	clientID := GetClientID(body)
 
-	// request to soundcloud url
+	// TODO: probably cleaner to just move this request into the GetArtwork function
+	// request to artwork url to download image data
 	artworkresp, err := http.Get(artworkURL)
 	if err != nil {
 		log.Fatalln(err)
 	}
+	// image data
 	image, err := ioutil.ReadAll(artworkresp.Body)
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	// TODO improve pattern for finding encrypted string ID
 	var re = regexp.MustCompile(`https:\/\/api-v2.*\/stream\/hls`) // pattern for finding encrypted string ID
 	// TODO not needed if encrypted string ID regex pattern is improved
@@ -55,6 +59,7 @@ func ExtractSong(url string) {
 
 	baseURL := ree.FindString(streamURL) // baseURL ex: https://api-v2.soundcloud.com/media/soundcloud:tracks:816595765/0ad937d5-a278-4b36-b128-220ac89aec04/stream
 
+	// TODO: replace with format string instead of concatenation
 	requestURL := baseURL + "/hls?client_id=" + clientID // API query string ex: https://api-v2.soundcloud.com/media/soundcloud:tracks:805856467/ddfb7463-50f1-476c-9010-729235958822/stream/hls?client_id=iY8sfHHuO2UsXy1QOlxthZoMJEY9v0eI
 
 	// query API
@@ -71,6 +76,7 @@ func ExtractSong(url string) {
 
 	var a audioLink
 
+	// unmarshal json data from response
 	audioerr := json.Unmarshal(m3u8Reponse, &a)
 	if er != nil {
 		panic(audioerr)
@@ -79,11 +85,11 @@ func ExtractSong(url string) {
 	// merege segments
 	mp3.Merge(a.URL, songname)
 
+	// replace empty cover image with SoundCloud artwork
 	tag, err := id3v2.Open(songname+".mp3", id3v2.Options{Parse: true})
 	if tag == nil || err != nil {
 		log.Fatal("Error while opening mp3 file: ", err)
 	}
-
 	pic := id3v2.PictureFrame{
 		Encoding:    id3v2.EncodingUTF8,
 		MimeType:    "image/jpeg",

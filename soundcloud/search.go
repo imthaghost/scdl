@@ -3,6 +3,9 @@ package soundcloud
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -28,6 +31,7 @@ func Search(query string) string {
 	if err != nil {
 		panic(err)
 	}
+	// TODO: fix
 	// Find the search items
 	doc.Find("noscript").Each(func(i int, s *goquery.Selection) {
 		fmt.Println(s.Text())
@@ -43,32 +47,27 @@ func Search(query string) string {
 	})
 	fmt.Println(urls)
 	// TODO: implement return url
-
-	searchFlg := flag.String("searchFlg", "", "flag for the search function")
-	flag.Parse()
-
-	fmt.Println(searchFlg)
-
 	return searchQueryString
 }
 
 // isSong looks at a given SoundCloud URL and determine if the URL is a song or not
 func isSong(url string) bool {
-	// TODO: implement
-	base := "https://soundcloud.com/search?q=%s"
-	
-	resp, err := http.Get(base)
-	if err != nil {
-		panic(err)
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	var re []string
-	r := bytes.NewReader(body)
-	doc, err := goquery.NewDocumentFromReader(r)
-	if err != nil {
-		panic(err)
-	}
+	// // TODO: implement
+	// base := "https://soundcloud.com/search?q=%s"
+
+	// resp, err := http.Get(base)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
+	// var re []string
+	// r := bytes.NewReader(body)
+	// doc, err := goquery.NewDocumentFromReader(r)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	return false
 }

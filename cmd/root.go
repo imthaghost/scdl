@@ -8,8 +8,6 @@ import (
 )
 
 var (
-	// Artwork flag
-	Artwork bool
 	// Search flag
 	Find bool
 
@@ -39,7 +37,6 @@ var (
 func Execute() {
 
 	// Persistent Flags
-	rootCmd.PersistentFlags().BoolVarP(&Artwork, "artwork", "a", false, "Option for downloading artwork image")
 	rootCmd.PersistentFlags().BoolVarP(&Find, "search", "s", false, "Option for searching for songs")
 
 	// Execute the command :)

@@ -6,6 +6,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// TODO return image instead of url
 // GetArtwork  returns the song artwork url
 func GetArtwork(data []byte) string {
 	var url string
