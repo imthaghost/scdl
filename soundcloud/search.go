@@ -69,5 +69,13 @@ func isSong(url string) bool {
 	// if err != nil {
 	// 	panic(err)
 	// }
+
+	var re = regexp.MustComplete("([^\/]*)$")
+
+	name, err := re.Find(url)
+	if err != nil {
+		panic(err)
+	}
+	
 	return false
 }
