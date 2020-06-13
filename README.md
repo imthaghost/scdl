@@ -57,6 +57,8 @@ go install
 -   [x] Goroutine pool for downloading m3u8 file
 -   [x] Installation via Brew
 -   [x] Mp3 file contains image cover
+-   [ ] Download a song through search functionality
+-   [ ] 80-100% test coverage
 -   [ ] Update tool for better performance
 ### Long term
 
@@ -76,4 +78,5 @@ Contributions are welcome! Please see [Contributing Guide](https://github.com/im
 <table>
   <tr>
     <td align="center"><a href="https://github.com/imthaghost"><img src="https://avatars3.githubusercontent.com/u/46610773?s=460&v=4" width="75px;" alt="Gary Frederick"/><br /><sub><b>Tha Ghost</b></sub></a><br /><a href="https://github.com/imthaghost/scdl/commits?author=imthaghost" title="Code">💻</a></td>
+     <td align="center"><a href="https://github.com/Tylerholland12"><img src=https://avatars3.githubusercontent.com/u/29693747?s=460&u=fe7499a0450042c5cd0153c2f8945db89dd39e71&v=4" width="75px;" alt="Tyler H"/><br /><sub><b>Tyler H</b></sub></a><br /><a href="https://github.com/imthaghost/scdl/commits?author=Tylerholland12" title="Code">💻</a></td>
   </tr>
