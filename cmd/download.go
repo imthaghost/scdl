@@ -13,6 +13,12 @@ func downloadSong(args []string) {
 		// album art image
 		fmt.Println("lmao")
 	}
+	if Find == true {
+
+		soundcloud.Search(url)
+		// exit
+		return
+	}
 	// song name
 	soundcloud.ExtractSong(url)
 
