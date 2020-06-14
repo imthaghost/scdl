@@ -5,6 +5,7 @@ import (
 )
 
 // ValidateURL checks for a valid url
+// TODO: implement tests
 func ValidateURL(url string) bool {
 	/*
 		>>> https://google.com
@@ -21,6 +22,7 @@ func ValidateURL(url string) bool {
 }
 
 // ValidateDomain checks for a valid domain
+// TODO: implement tests
 func ValidateDomain(domain string) bool {
 	/*
 		>>> google.com

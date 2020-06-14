@@ -15,6 +15,7 @@ type Joiner struct {
 }
 
 // New ...
+// TODO: implement tests
 func New(name string) (*Joiner, error) {
 	f, err := os.OpenFile(name, os.O_CREATE|os.O_TRUNC|os.O_APPEND|os.O_WRONLY, 0755)
 	if err != nil {
@@ -32,6 +33,7 @@ func New(name string) (*Joiner, error) {
 }
 
 // Join ...
+// TODO: implement tests
 func (j *Joiner) Join(id int, block []byte) {
 	j.l.Lock()
 	j.blocks[id] = block
@@ -39,6 +41,7 @@ func (j *Joiner) Join(id int, block []byte) {
 }
 
 // Run ...
+// TODO: implement tests
 func (j *Joiner) Run(count int) error {
 	var index = 0
 	for index < count {
@@ -63,6 +66,7 @@ func (j *Joiner) Run(count int) error {
 }
 
 // Name ...
+// TODO: implement tests
 func (j Joiner) Name() string {
 	return j.name
 }

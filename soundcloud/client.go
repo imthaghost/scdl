@@ -10,8 +10,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// TODO implement tests
 // GetClientID returns a the new generated client_id when a request is made to SoundCloud's API
+// TODO implment tests
 func GetClientID(data []byte) string {
 	var url string
 	r := bytes.NewReader(data)

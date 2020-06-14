@@ -10,8 +10,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// TODO implment tests
 // Search returns the first URL on SoundCloud most similar to the user input
+// TODO implment tests
 func Search(query string) string {
 	base := "https://soundcloud.com/search?q=%s"
 	searchQueryString := fmt.Sprintf(base, query)

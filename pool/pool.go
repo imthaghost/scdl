@@ -4,16 +4,16 @@ import (
 	"sync"
 )
 
-// TODO implement tests
 // HackPool ...
+// TODO: implement tests
 type HackPool struct {
 	numGo    int
 	messages chan interface{}
 	function func(interface{})
 }
 
-// TODO implement tests
 // New ...
+// TODO: implement tests
 func New(numGoroutine int, function func(interface{})) *HackPool {
 	return &HackPool{
 		numGo:    numGoroutine,
@@ -22,20 +22,20 @@ func New(numGoroutine int, function func(interface{})) *HackPool {
 	}
 }
 
-// TODO implement tests
 // Push ...
+// TODO: implement tests
 func (c *HackPool) Push(data interface{}) {
 	c.messages <- data
 }
 
-// TODO implement tests
 // CloseQueue ...
+// TODO: implement tests
 func (c *HackPool) CloseQueue() {
 	close(c.messages)
 }
 
-// TODO implement tests
 // Run ...
+// TODO: implement tests
 func (c *HackPool) Run() {
 	var wg sync.WaitGroup
 

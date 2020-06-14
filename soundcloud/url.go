@@ -10,8 +10,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// TODO: implement tests
 // GetSongName uses regex to grab the song name from the URL string
+// TODO: implement tests
 func GetSongName(url string) string {
 	/*
 		>>> https://soundcloud.com/chillem-637935049/1400-999-freestyle
@@ -28,8 +28,8 @@ func GetSongName(url string) string {
 	return name
 }
 
-// TODO: implement tests
 // IsSong looks at a given SoundCloud URL and determine if the URL is a song or not
+// TODO: implement tests
 func IsSong(url string) bool {
 	/*
 		>>> https://soundcloud.com/uiceheidd
