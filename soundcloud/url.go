@@ -10,6 +10,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// TODO: implement tests
 // GetSongName uses regex to grab the song name from the URL string
 func GetSongName(url string) string {
 	/*
@@ -27,6 +28,7 @@ func GetSongName(url string) string {
 	return name
 }
 
+// TODO: implement tests
 // IsSong looks at a given SoundCloud URL and determine if the URL is a song or not
 func IsSong(url string) bool {
 	/*
@@ -36,7 +38,7 @@ func IsSong(url string) bool {
 		>>> https://soundcloud.com/uiceheidd/tell-me-you-love-me
 		<<< true
 	*/
-	var song bool
+
 	// request to soundcloud url
 	resp, err := http.Get(url)
 	if err != nil {
@@ -54,12 +56,12 @@ func IsSong(url string) bool {
 	if err != nil {
 		panic(err)
 	}
+	// find first instance of meta tag with property soundcloug:like_count
 	x := doc.Find("meta[property='soundcloud:like_count']").First()
+	// tag's data
 	_, exists := x.Attr("content")
 	if exists {
-		song = true
-	} else {
-		song = false
+		return true
 	}
-	return song
+	return false
 }

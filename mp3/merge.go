@@ -29,6 +29,7 @@ var (
 	keyCacheLock sync.Mutex
 )
 
+// TODO implement tests
 func start(mpl *m3u8.MediaPlaylist) {
 	p := pool.New(10, download)
 
@@ -43,6 +44,7 @@ func start(mpl *m3u8.MediaPlaylist) {
 	go p.Run()
 }
 
+// TODO implement tests
 func parseM3u8(m3u8Url string) (*m3u8.MediaPlaylist, error) {
 	statusCode, data, err := ZHTTP.Get(m3u8Url)
 	if err != nil {
@@ -97,6 +99,7 @@ func parseM3u8(m3u8Url string) (*m3u8.MediaPlaylist, error) {
 	return nil, errors.New("Unsupport m3u8 type")
 }
 
+// TODO implement tests
 func getKey(url string) ([]byte, error) {
 	keyCacheLock.Lock()
 	defer keyCacheLock.Unlock()
@@ -120,6 +123,7 @@ func getKey(url string) ([]byte, error) {
 	return key, nil
 }
 
+// TODO implement tests
 func download(in interface{}) {
 	params := in.([]interface{})
 	id := params[0].(int)
@@ -174,6 +178,7 @@ func download(in interface{}) {
 	JOINER.Join(id, data)
 }
 
+// TODO implement tests
 func formatURI(base *url.URL, u string) (string, error) {
 	if strings.HasPrefix(u, "http") {
 		return u, nil
@@ -193,6 +198,7 @@ func filename(u string) string {
 	return filename
 }
 
+// TODO implement tests
 // Merge ...
 func Merge(url string, songname string) {
 

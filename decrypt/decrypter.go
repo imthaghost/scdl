@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 )
 
+// TODO implement tests
 // Decrypt ...
 func Decrypt(data, key, iv []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)

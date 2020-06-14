@@ -6,6 +6,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// TODO: implement tests
 // GetTitle returns title of the song
 func GetTitle(data []byte) string {
 	var title string

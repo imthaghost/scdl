@@ -15,6 +15,7 @@ type audioLink struct {
 	URL string `json:"url"`
 }
 
+// TODO: implement tests
 // ExtractSong queries the SoundCloud api and receives a m3u8 file, then binds the segments received into a .mp3 file
 func ExtractSong(url string) {
 
