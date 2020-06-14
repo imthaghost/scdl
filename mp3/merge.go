@@ -198,8 +198,8 @@ func filename(u string) string {
 	return filename
 }
 
-// TODO implement tests
 // Merge ...
+// TODO implement tests
 func Merge(url string, songname string) {
 
 	keyCache = map[string][]byte{}
