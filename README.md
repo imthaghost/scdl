@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="gopher" src="docs/media/music.png"> 
+    <img alt="gopher" src="docs/media/music.png"> <img alt="gopher" src="docs/media/pods.png"> 
 </p>
 <p align="center">
 Scdl is the fastest SoundCloud music downloading CLI tool. Scdl utilizes go routine pools which allows you to download any song from SoundCloud within seconds. There are extended features such as recursively downloading all songs from a given artist and grabbing song artwork.
