@@ -28,7 +28,7 @@ var (
 			}
 
 			// download song
-			downloadSong(args)
+			scdl(args)
 		},
 	}
 )

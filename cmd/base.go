@@ -4,7 +4,7 @@ import (
 	"github.com/imthaghost/scdl/soundcloud"
 )
 
-func downloadSong(args []string) {
+func scdl(args []string) {
 	url := args[0]
 
 	if Find == true {
@@ -13,7 +13,7 @@ func downloadSong(args []string) {
 		// exit
 		return
 	}
-	// song name
+	// download song
 	soundcloud.ExtractSong(url)
 
 }
