@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	// Search flag
+	// Find is --search flag
 	Find bool
 
 	// Root cmd

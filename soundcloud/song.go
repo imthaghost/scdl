@@ -36,7 +36,7 @@ func ExtractSong(url string) {
 	// parse the response data to grab the artwork URL
 	artworkURL := GetArtwork(body)
 
-	// parse the response data and make a reqeust to recieve clien_id embeded in the javascript
+	// parse the response data and make a reqeust to receive clien_id embedded in the javascript
 	clientID := GetClientID(body)
 
 	// TODO: probably cleaner to just move this request into the GetArtwork function
