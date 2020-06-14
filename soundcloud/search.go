@@ -76,12 +76,11 @@ func isSong(url string) bool {
 	if err != nil {
 		panic(err)
 	}
-	doc.Find("meta[property='SoundCloud:title']").Each(func(i int, s *goquery.Selection) {
+	doc.Find("meta[property='soundcloud:follower_count']").Each(func(i int, s *goquery.Selection) {
 		// get the data from found element's content attribute
 		song, exists := s.Attr("content")
-		if exists {
+		if like_count || play_count exists {
 			title = song
-
 		}
 	})
 	
