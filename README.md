@@ -2,7 +2,7 @@
     <img alt="gopher" src="docs/media/music.png"> <img alt="gopher" src="docs/media/pods.png"> 
 </p>
 <p align="center">
-Scdl is the fastest SoundCloud music downloading CLI tool. Scdl utilizes go routine pools which allows you to download any song from SoundCloud within seconds. There are extended features such as recursively downloading all songs from a given artist and grabbing song artwork.
+Scdl is the fastest SoundCloud music downloading CLI tool. Scdl utilizes go routine pools which allows you to download any song from SoundCloud within seconds. There are extended features such as search (no URL needed) recursively downloading all songs from a given playlist and more!
 </p>
 <br>
 <p align="center">
@@ -18,6 +18,7 @@ Scdl is the fastest SoundCloud music downloading CLI tool. Scdl utilizes go rout
 ## Table of Contents
 
 -   [Installation](#installation)
+-   [Examples](#Examples)
 -   [Todo](#Todo)
 -   [License](#license)
 -   [Contributors](#contributors)
@@ -48,6 +49,37 @@ go install
 
 [Download Here](https://www.mediafire.com/file/ynkvkaoo4rvvv4v/scdl/file)
 
+## Examples
+
+### Base Command
+```bash 
+# command + SounCloud URL
+scdl https://soundcloud.com/polo-g/polo-g-feat-juice-wrld-flex
+```
+
+### Search
+```bash 
+# search flag
+scdl lucid dreams --search
+# or
+scdl lucid dreams -s
+```
+
+### All Songs From Playlist
+```bash 
+# download all songs from playlist with playlist flag
+scdl https://soundcloud.com/soundcloud-hustle/sets/rap-new-hot --playlist
+# or
+scdl https://soundcloud.com/soundcloud-hustle/sets/rap-new-hot --p
+```
+
+### Help
+```bash 
+# get a list of commands
+scdl --help
+# or
+scdl -h
+```
 ## Todo
 
 ### Short term
