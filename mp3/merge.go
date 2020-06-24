@@ -173,8 +173,6 @@ func download(in interface{}) {
 		}
 	}
 
-	// log.Println("[+] Download succed:", segment.URI)
-
 	JOINER.Join(id, data)
 }
 
