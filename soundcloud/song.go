@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/bogem/id3v2"
 	"github.com/fatih/color"
 	"github.com/imthaghost/scdl/mp3"
 )
 
+// audio link struct for unmarshalling data
 type audioLink struct {
 	URL string `json:"url"`
 }
@@ -79,19 +79,7 @@ func ExtractSong(url string) {
 	// merege segments
 	mp3.Merge(a.URL, songname)
 
-	// replace empty cover image with SoundCloud artwork
-	tag, err := id3v2.Open(songname+".mp3", id3v2.Options{Parse: true})
-	if tag == nil || err != nil {
-		red := color.New(color.FgRed).SprintFunc()
-		fmt.Printf("%s Error while opening mp3 file: %s\n", red("[-]"), err)
-	}
-	pic := id3v2.PictureFrame{
-		Encoding:    id3v2.EncodingUTF8,
-		MimeType:    "image/jpeg",
-		PictureType: id3v2.PTFrontCover,
-		Description: "Front cover",
-		Picture:     image,
-	}
-	tag.AddAttachedPicture(pic)
-	tag.Save()
+	// set cover image for mp3 file
+	// TODO: put this code somewhere so that the image gets set at the same time as the song data is being written for smoother transition
+	mp3.SetCoverImage(songname+".mp3", image)
 }
