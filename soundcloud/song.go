@@ -53,6 +53,7 @@ func ExtractSong(url string) {
 	// TODO: replace with format string instead of concatenation
 	requestURL := baseURL + "/hls?client_id=" + clientID // API query string ex: https://api-v2.soundcloud.com/media/soundcloud:tracks:805856467/ddfb7463-50f1-476c-9010-729235958822/stream/hls?client_id=iY8sfHHuO2UsXy1QOlxthZoMJEY9v0eI
 
+
 	// query API
 	r, err := http.Get(requestURL)
 	if err != nil {
@@ -67,6 +68,9 @@ func ExtractSong(url string) {
 		fmt.Printf("%s Error creating reader from api response %s\n", red("[-]"), err)
 	}
 
+	// set cover image for mp3 file
+	mp3.SetCoverImage(songname+".mp3", image)
+
 	var a audioLink
 
 	// unmarshal json data from response
@@ -79,7 +83,6 @@ func ExtractSong(url string) {
 	// merege segments
 	mp3.Merge(a.URL, songname)
 
-	// set cover image for mp3 file
+
 	// TODO: put this code somewhere so that the image gets set at the same time as the song data is being written for smoother transition
-	mp3.SetCoverImage(songname+".mp3", image)
 }
