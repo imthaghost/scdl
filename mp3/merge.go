@@ -31,7 +31,9 @@ var (
 
 // TODO implement tests
 func start(mpl *m3u8.MediaPlaylist) {
-	p := pool.New(10, download)
+	// 30 go routines for now
+	// TODO: find optimal go routine amount
+	p := pool.New(30, download)
 
 	go func() {
 		var count = int(mpl.Count())
