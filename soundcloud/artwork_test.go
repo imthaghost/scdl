@@ -11,15 +11,13 @@ import (
 )
 
 // Todo: Edge Cases
-func TestGetTitle(t *testing.T) {
+func TestGetArtwork(t *testing.T) {
 	tables := []struct {
 		url      string
 		expected string
 	}{
-		{"https://soundcloud.com/uiceheidd/tell-me-you-love-me", "Tell Me U Luv Me (with Trippie Redd)"},
-		{"https://soundcloud.com/uiceheidd/empty", "Empty"},
-		{"https://soundcloud.com/a-boogie-wit-da-hoodie/demons-and-angels", "Demons and Angels feat. Juice WRLD"},
-		{"https://soundcloud.com/uiceheidd/im-still", "I'm Still"},
+		{"https://soundcloud.com/uiceheidd/tell-me-you-love-me", "https://i1.sndcdn.com/artworks-DuzeporxapxyfgpP-PkGOzQ-t500x500.jpg"},
+		{"https://soundcloud.com/uiceheidd/righteous", "https://i1.sndcdn.com/artworks-aoE3z9jDcBF2yf5p-f62P6Q-t500x500.jpg"},
 	}
 	for _, table := range tables {
 		// request to user inputed SoundCloud URL
@@ -32,7 +30,7 @@ func TestGetTitle(t *testing.T) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		result := GetTitle(body)
+		result, _ := GetArtwork(body)
 		expectedresult := table.expected
 		if result != expectedresult {
 			t.Error()
