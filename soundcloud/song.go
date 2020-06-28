@@ -76,11 +76,10 @@ func ExtractSong(url string) {
 		fmt.Printf("%s Error unmarshalling API response: %s\n", red("[-]"), audioerr)
 	}
 
-	// merege segments
+	// merge segments
 	mp3.Merge(a.URL, songname)
 
 	// set cover image for mp3 file
 	// TODO: put this code somewhere so that the image gets set at the same time as the song data is being written for smoother transition
 	mp3.SetCoverImage(songname+".mp3", image)
-
 }

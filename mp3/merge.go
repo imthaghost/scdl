@@ -247,4 +247,7 @@ func Merge(url string, songname string) {
 		fmt.Printf("%s Download succed, saved to %s\n", g("[+]"), JOINER.Name())
 
 	}
+	_, image := GetArtwork(body)
+
+	setCoverImage(outFile, )
 }
