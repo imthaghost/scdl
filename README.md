@@ -18,6 +18,7 @@ Scdl is the fastest SoundCloud music downloading CLI tool. Scdl utilizes a go ro
 ## Table of Contents
 
 -   [Installation](#installation)
+-   [Usage](#usage)
 -   [Examples](#Examples)
 -   [Todo](#Todo)
 -   [License](#license)
@@ -49,6 +50,11 @@ go install
 
 [Download Here](https://www.mediafire.com/file/ynkvkaoo4rvvv4v/scdl/file)
 
+## Usage
+
+![Usage](/docs/media/usage.png)
+
+
 ## Examples
 
 ### Base Command
@@ -65,21 +71,6 @@ scdl lucid dreams --search
 scdl lucid dreams -s
 ```
 
-### All Songs From Playlist
-```bash 
-# download all songs from playlist with playlist flag
-scdl https://soundcloud.com/soundcloud-hustle/sets/rap-new-hot --playlist
-# or
-scdl https://soundcloud.com/soundcloud-hustle/sets/rap-new-hot --p
-```
-
-### Help
-```bash 
-# get a list of commands
-scdl --help
-# or
-scdl -h
-```
 ## Todo
 
 ### Short term
@@ -92,8 +83,10 @@ scdl -h
 -   [ ] Download a song through search functionality
 -   [ ] 80-100% test coverage
 -   [ ] Update tool for better performance
+-   [ ] Proxy flag
+-   [ ] Format flag
 ### Long term
-
+-   [ ] Search results
 -   [ ] Download all songs from a given playlist
 -   [ ] Download all songs from a given album
 
