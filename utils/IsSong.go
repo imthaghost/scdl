@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -30,7 +31,7 @@ func IsSong(url string) bool {
 	// response body
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err)
 	}
 	// turn byte array into reader
 	data := bytes.NewReader(body)
