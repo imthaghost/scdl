@@ -1,6 +1,6 @@
 language: go
 
-install:
+before_script:
     - go mod download
 
 script:
