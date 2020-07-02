@@ -29,7 +29,7 @@ func New(timeout time.Duration, proxy string) (*Zhttp, error) {
 			return nil, err
 		}
 
-		t := http.DefaultTransport.(*http.Transport).Clone()
+		t := http.DefaultTransport.(*http.Transport)
 		t.Proxy = func(*http.Request) (*url.URL, error) {
 			return p, nil
 		}

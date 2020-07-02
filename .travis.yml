@@ -7,6 +7,6 @@ install:
     - go get github.com/grafov/m3u8 
     - go get github.com/spf13/cobra 
     - go get github.com/torden/go-strutil 
-    
+
 script:
-    - go test tests/*
+    - go test tests/* -v 
