@@ -1,6 +1,7 @@
 language: go
 
-
+install:
+    go get github.com/fatih/color
 
 script:
     - go test tests/*
