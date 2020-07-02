@@ -1,7 +1,7 @@
 language: go
 
-before_script:
-    - go mod download
+install:
+    - go get -u -v -f all
 
 script:
     - go test tests/*
