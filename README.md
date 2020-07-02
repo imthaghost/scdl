@@ -80,7 +80,7 @@ scdl lucid dreams -s
 -   [x] Goroutine pool for downloading m3u8 file
 -   [x] Installation via Brew
 -   [x] Mp3 file contains image cover
--   [ ] Download a song through search functionality
+-   [x] Download a song through search functionality
 -   [ ] 80-100% test coverage
 -   [ ] Update tool for better performance
 -   [ ] Proxy flag
