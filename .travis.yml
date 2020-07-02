@@ -1,7 +1,4 @@
 language: go
 
-install:
-    - go get -t -v ./...
-
 script:
     - go test tests/*
