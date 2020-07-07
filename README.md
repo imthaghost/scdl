@@ -54,9 +54,9 @@ go install
 
 ## Usage
 
-  ``-h, --help`` Help screen and usage
+  ``-h, --help`` -  Help screen and usage
 
-  ``-s, --search`` Option for searching for songs
+  ``-s, --search`` - Option for searching for songs
 
 
 ## Examples
