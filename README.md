@@ -57,6 +57,7 @@ go install
 ``scdl <url> [flags]``
 
 ``Flags:``
+
   ``-h, --help     help for scdl``
   ``-s, --search   Option for searching for songs``
 
