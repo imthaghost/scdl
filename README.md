@@ -54,9 +54,9 @@ go install
 
 ## Usage
 
-  ``-h, --help  |  help for scdl``
+  ``-h, --help  -  help for scdl``
 
-  ``-s, --search   | Option for searching for songs``
+  ``-s, --search  - Option for searching for songs``
 
 
 ## Examples
