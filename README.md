@@ -54,11 +54,6 @@ go install
 
 ## Usage
 
-``Base:``
-
-``scdl <url> [flags]``
-
-
   ``-h, --help     help for scdl``
 
   ``-s, --search   Option for searching for songs``
