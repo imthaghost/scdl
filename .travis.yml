@@ -9,4 +9,5 @@ install:
     - go get github.com/torden/go-strutil 
 
 script:
-    - go test tests/* -v 
+    - go test soundcloud/* -v
+    - go test utils/* -v 

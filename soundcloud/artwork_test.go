@@ -1,4 +1,4 @@
-package tests
+package soundcloud
 
 import (
 	"fmt"
@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/fatih/color"
-	"github.com/imthaghost/scdl/soundcloud"
 )
 
 // Todo: Edge Cases
@@ -31,7 +30,7 @@ func TestGetArtwork(t *testing.T) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		result, _ := soundcloud.GetArtwork(body)
+		result, _ := GetArtwork(body)
 		expectedresult := table.expected
 		if result != expectedresult {
 			t.Error()

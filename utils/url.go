@@ -5,7 +5,8 @@ import (
 )
 
 // ValidateURL checks for a valid url
-func ValidURL(url string) bool {
+// TODO: implement tests
+func ValidateURL(url string) bool {
 	/*
 		>>> https://google.com
 		<<< true
@@ -14,6 +15,23 @@ func ValidURL(url string) bool {
 		<<< false
 	*/
 	if !strutil.NewStringValidator().IsValidURL(url) {
+		return false
+	}
+
+	return true
+}
+
+// ValidateDomain checks for a valid domain
+// TODO: implement tests
+func ValidateDomain(domain string) bool {
+	/*
+		>>> google.com
+		<<< true
+
+		>>> google
+		<<< false
+	*/
+	if !strutil.NewStringValidator().IsValidDomain(domain) {
 		return false
 	}
 

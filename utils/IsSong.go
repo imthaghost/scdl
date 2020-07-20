@@ -20,7 +20,7 @@ func IsSong(url string) bool {
 		>>> https://soundcloud.com/uiceheidd/tell-me-you-love-me
 		<<< true
 	*/
-	if !ValidURL(url) {
+	if !ValidateURL(url) {
 		return false
 	}
 	// request to soundcloud url

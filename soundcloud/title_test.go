@@ -1,4 +1,4 @@
-package tests
+package soundcloud
 
 import (
 	"fmt"
@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/fatih/color"
-	"github.com/imthaghost/scdl/soundcloud"
 )
 
 // Todo: Edge Cases
@@ -33,7 +32,7 @@ func TestGetTitle(t *testing.T) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		result := soundcloud.GetTitle(body)
+		result := GetTitle(body)
 		expectedresult := table.expected
 		if result != expectedresult {
 			t.Error()

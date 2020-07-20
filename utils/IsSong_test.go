@@ -1,11 +1,10 @@
-package tests
+package utils
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/fatih/color"
-	"github.com/imthaghost/scdl/utils"
 )
 
 func TestIsSong(t *testing.T) {
@@ -31,7 +30,7 @@ func TestIsSong(t *testing.T) {
 		{"https://soundcloud.com/soundcloud-the-peak/sets/on-the-up-the-peak-hot-new", false},
 	}
 	for _, table := range tables {
-		result := utils.IsSong(table.url)
+		result := IsSong(table.url)
 		expectedresult := table.expected
 		if result != expectedresult {
 			t.Error()
