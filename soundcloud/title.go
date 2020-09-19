@@ -2,7 +2,6 @@ package soundcloud
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -26,7 +25,8 @@ func GetTitle(data []byte) string {
 
 		}
 	})
+
 	title = strings.ReplaceAll(title, "/", "")
-	fmt.Println(title)
+
 	return title
 }
