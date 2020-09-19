@@ -26,7 +26,9 @@ func GetTitle(data []byte) string {
 		}
 	})
 
-	title = strings.ReplaceAll(title, "/", "")
+	clean := strings.ReplaceAll(title, "/", "")
+
+	title = clean
 
 	return title
 }
