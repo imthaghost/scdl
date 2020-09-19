@@ -27,8 +27,18 @@ func GetTitle(data []byte) string {
 		}
 	})
 	// sanitize
-	title = strings.Replace(title, "/", "", -1)
+	title = strings.Replace(title, "/", "-", -1)
 
+	//sanitize for Windows
+	title = strings.Replace(title, "<", "-", -1)
+	title = strings.Replace(title, ">", "-", -1)
+	title = strings.Replace(title, "\"", "''", -1)
+	title = strings.Replace(title, "\\", "-", -1)
+	title = strings.Replace(title, "|", "-", -1)
+	title = strings.Replace(title, "?", "", -1)
+	title = strings.Replace(title, "*", "", -1)
+	title = strings.Replace(title, ":", "-", -1)
+	
 	fmt.Println(title)
 
 	return title
