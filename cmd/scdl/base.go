@@ -1,7 +1,7 @@
-package cmd
+package scdl
 
 import (
-	"github.com/imthaghost/scdl/soundcloud"
+	"github.com/imthaghost/scdl/pkg/soundcloud"
 )
 
 func scdl(args []string) {

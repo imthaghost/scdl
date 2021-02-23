@@ -1,4 +1,4 @@
-package cmd
+package scdl
 
 import (
 	"log"

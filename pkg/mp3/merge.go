@@ -14,10 +14,10 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/grafov/m3u8"
-	"github.com/imthaghost/scdl/decrypt"
-	"github.com/imthaghost/scdl/joiner"
-	"github.com/imthaghost/scdl/pool"
-	"github.com/imthaghost/scdl/zhttp"
+	"github.com/imthaghost/scdl/pkg/decrypt"
+	"github.com/imthaghost/scdl/pkg/joiner"
+	"github.com/imthaghost/scdl/pkg/pool"
+	"github.com/imthaghost/scdl/pkg/zhttp"
 )
 
 var (
@@ -33,7 +33,7 @@ var (
 func start(mpl *m3u8.MediaPlaylist) {
 	// 30 go routines for now
 	// TODO: find optimal go routine amount
-	p := pool.New(30, download)
+	p := pool.New(100, download)
 
 	go func() {
 		var count = int(mpl.Count())
