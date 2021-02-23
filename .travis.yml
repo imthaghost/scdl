@@ -5,9 +5,8 @@ install:
     - go get github.com/bogem/id3v2 
     - go get github.com/fatih/color 
     - go get github.com/grafov/m3u8 
-    - go get github.com/spf13/cobra 
     - go get github.com/torden/go-strutil
 
 script:
-    - go test soundcloud/* -v
-    - go test utils/* -v 
+    - go test pkg/soundcloud/* -v
+    - go test pkg/utils/* -v
