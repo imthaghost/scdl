@@ -7,11 +7,7 @@ Scdl is the fastest SoundCloud music downloading CLI tool. Scdl utilizes a go ro
 <br>
 <p align="center">
    <a href="https://goreportcard.com/report/github.com/imthaghost/scdl"><img src="https://goreportcard.com/badge/github.com/imthaghost/scdl"></a>
-   <a href="https://api.travis-ci.org/imthaghost/scdl.svg?branch=master">
-    <img src="https://api.travis-ci.org/imthaghost/scdl.svg?branch=master"alt="build status">
-   <a href="https://github.com/imthaghost/gitmoji-changelog">
-    <img src="https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg"alt="awesome">
-  </a>
+   <a href="https://api.travis-ci.org/imthaghost/scdl.svg?branch=master"><img src="https://api.travis-ci.org/imthaghost/scdl.svg?branch=master"alt="build status"></a>
 </p>
 <br>
 
