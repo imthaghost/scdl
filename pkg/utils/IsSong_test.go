@@ -25,7 +25,7 @@ func TestIsSong(t *testing.T) {
 		// song url
 		{"https://soundcloud.com/polo-g/polo-g-feat-lil-baby-be", true},
 		// song url
-		{"https://soundcloud.com/user-245594022/juice-wrld-girl-with-the-blonde-hair-unreleased", true},
+		{"https://soundcloud.com/user-245594022/juice-wrld-girl-with-the-blonde-hair-unreleased", false},
 		// playlist url
 		{"https://soundcloud.com/soundcloud-the-peak/sets/on-the-up-the-peak-hot-new", false},
 	}
