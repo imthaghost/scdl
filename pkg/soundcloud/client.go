@@ -19,7 +19,7 @@ func GetClientID(data []byte) string {
 	if err != nil {
 		panic(err)
 	}
-	doc.Find("body > script:nth-child(9)").Each(func(i int, s *goquery.Selection) {
+	doc.Find("body > script:nth-child(15)").Each(func(i int, s *goquery.Selection) {
 		data, exists := s.Attr("src")
 		if exists {
 			url = data
