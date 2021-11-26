@@ -23,5 +23,9 @@ func SetCoverImage(filepath string, image []byte) {
 		Picture:     image,
 	}
 	tag.AddAttachedPicture(pic)
-	tag.Save()
+	err = tag.Save()
+	if err != nil {
+		red := color.New(color.FgRed).SprintFunc()
+		fmt.Printf("%s Error while saving mp3 artwork: %s\n", red("[-]"), err)
+	}
 }
