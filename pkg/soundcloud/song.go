@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"regexp"
 
 	"github.com/fatih/color"
@@ -19,7 +21,7 @@ type audioLink struct {
 
 // ExtractSong queries the SoundCloud api and receives a m3u8 file, then binds the segments received into a .mp3 file
 // TODO: implement tests
-func ExtractSong(url string) {
+func ExtractSong(url string, dirPath string) {
 
 	// request to user inputed SoundCloud URL
 	resp, err := http.Get(url)
@@ -33,7 +35,7 @@ func ExtractSong(url string) {
 	}
 
 	// parse the response data to grab the song name
-	songname := GetTitle(body)
+	songName := GetTitle(body)
 
 	// parse the response data to grab the artwork image and url
 	_, image := GetArtwork(body)
@@ -42,7 +44,7 @@ func ExtractSong(url string) {
 	clientID := GetClientID(body)
 
 	// TODO improve pattern for finding encrypted string ID
-	var re = regexp.MustCompile(`https:\/\/api-v2.*\/stream\/hls`) // pattern for finding encrypted string ID
+	var re = regexp.MustCompile(`https://api-v2.*/stream/hls`) // pattern for finding encrypted string ID
 	// TODO not needed if encrypted string ID regex pattern is improved
 	var ree = regexp.MustCompile(`.+?(stream)`) // pattern for finding stream URL
 
@@ -77,9 +79,9 @@ func ExtractSong(url string) {
 	}
 
 	// merge segments
-	mp3.Merge(a.URL, songname)
+	mp3.Merge(a.URL, filepath.Join(dirPath, string(os.PathSeparator), songName))
 
 	// set cover image for mp3 file
 	// TODO: put this code somewhere so that the image gets set at the same time as the song data is being written for smoother transition
-	mp3.SetCoverImage(songname+".mp3", image)
+	mp3.SetCoverImage(songName+".mp3", image)
 }

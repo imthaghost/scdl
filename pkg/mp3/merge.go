@@ -200,7 +200,7 @@ func filename(u string) string {
 
 // Merge ...
 // TODO implement tests
-func Merge(url string, songname string) {
+func Merge(url string, songPath string) {
 
 	keyCache = map[string][]byte{}
 
@@ -220,7 +220,7 @@ func Merge(url string, songname string) {
 		fmt.Printf("%s Parse m3u8 file succed %s\n", green("[+]"), "")
 	}
 
-	outFile := songname + ".mp3"
+	outFile := songPath + ".mp3"
 
 	JOINER, err = joiner.New(outFile)
 
@@ -229,7 +229,7 @@ func Merge(url string, songname string) {
 		fmt.Printf("%s Open file failed: %s\n", red("[-]"), err)
 	} else {
 		green := color.New(color.FgGreen).SprintFunc()
-		fmt.Printf("%s Will save to %s\n", green("[+]"), JOINER.Name())
+		fmt.Printf("%s Will save to %s\n", green("[+]"), JOINER.Path())
 	}
 
 	if mpl.Count() > 0 {
@@ -244,7 +244,7 @@ func Merge(url string, songname string) {
 			fmt.Printf("%s Write to file failed: %s\n", red("[-]"), err)
 		}
 		g := color.New(color.FgGreen).SprintFunc()
-		fmt.Printf("%s Download succed, saved to %s\n", g("[+]"), JOINER.Name())
+		fmt.Printf("%s Download succed, saved to %s\n", g("[+]"), JOINER.Path())
 
 	}
 

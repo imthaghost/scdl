@@ -11,13 +11,13 @@ type Joiner struct {
 	l      sync.Mutex
 	blocks map[int][]byte
 	file   *os.File
-	name   string
+	path   string
 }
 
 // New ...
 // TODO: implement tests
-func New(name string) (*Joiner, error) {
-	f, err := os.OpenFile(name, os.O_CREATE|os.O_TRUNC|os.O_APPEND|os.O_WRONLY, 0755)
+func New(path string) (*Joiner, error) {
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_APPEND|os.O_WRONLY, 0755)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func New(name string) (*Joiner, error) {
 	joiner := &Joiner{
 		blocks: map[int][]byte{},
 		file:   f,
-		name:   name,
+		path:   path,
 	}
 
 	return joiner, nil
@@ -65,8 +65,8 @@ func (j *Joiner) Run(count int) error {
 	return j.file.Close()
 }
 
-// Name ...
+// Path ...
 // TODO: implement tests
-func (j Joiner) Name() string {
-	return j.name
+func (j *Joiner) Path() string {
+	return j.path
 }
