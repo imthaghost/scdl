@@ -20,7 +20,6 @@ Scdl is the fastest SoundCloud music downloading CLI tool. Scdl utilizes a go ro
 -   [Examples](#Examples)
 -   [Todo](#Todo)
 -   [License](#license)
--   [Contributors](#contributors)
 
 ## 🚀 Installation
 
