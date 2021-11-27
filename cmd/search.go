@@ -1,5 +1,4 @@
-// Package scdl /*
-package scdl
+package cmd
 
 import (
 	"github.com/imthaghost/scdl/pkg/soundcloud"

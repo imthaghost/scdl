@@ -1,5 +1,4 @@
-// Package scdl /*
-package scdl
+package cmd
 
 import (
 	"errors"
@@ -26,6 +25,7 @@ var (
 			}
 			scdlSaveSong(url, resolvedPath)
 		},
+		Example: "scdl ssong https://soundcloud.com/darude/sandstorm-radio-edit -f ~/myMusic/",
 		// ToDo: autocompletion would be nice =)
 		//BashCompletionFunction: func() {},
 	}
@@ -41,6 +41,7 @@ var (
 				log.Fatal(err)
 			}
 			scdlSavePlaylist(url, resolvedPath)
+			log.Fatal("Not implemented yet.")
 		},
 	}
 
@@ -55,6 +56,7 @@ var (
 				log.Fatal(err)
 			}
 			scdlSaveUserLikes(url, resolvedPath)
+			log.Fatal("Not implemented yet.")
 		},
 	}
 )
