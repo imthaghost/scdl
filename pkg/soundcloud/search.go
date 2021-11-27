@@ -15,7 +15,7 @@ import (
 func Search(query string) string {
 	base := "https://soundcloud.com/search?q=%s"
 	searchQueryString := fmt.Sprintf(base, query)
-	fmt.Println(searchQueryString)
+	//fmt.Println(searchQueryString)
 	// request to soundcloud url
 	resp, err := http.Get(searchQueryString)
 	if err != nil {
