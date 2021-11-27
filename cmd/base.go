@@ -1,19 +1,15 @@
 package cmd
 
-import (
-	"github.com/imthaghost/scdl/soundcloud"
-)
+import "github.com/imthaghost/scdl/pkg/soundcloud"
 
-func scdl(args []string) {
-	url := args[0]
+func scdlSaveSong(url string, path string) {
+	soundcloud.ExtractSong(url, path)
+}
 
-	if Find == true {
+func scdlSavePlaylist(url string, path string) {
+	// ToDo: implement request for song list
+}
 
-		soundcloud.Search(url)
-		// exit
-		return
-	}
-	// download song
-	soundcloud.ExtractSong(url)
-
+func scdlSaveUserLikes(url string, path string) {
+	// ToDo: implement request for song list
 }
