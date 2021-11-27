@@ -46,7 +46,7 @@ go install
 
 ### Binary
 
-[Download Here](https://www.mediafire.com/file/ynkvkaoo4rvvv4v/scdl/file)
+[Download Here](https://github.com/imthaghost/scdl/releases)
 
 ## Usage
 
