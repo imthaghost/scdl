@@ -3,83 +3,97 @@ package soundcloud
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/antchfx/htmlquery"
+	"github.com/imthaghost/scdl/pkg/mp3"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"regexp"
-
-	"github.com/fatih/color"
-	"github.com/imthaghost/scdl/pkg/mp3"
 )
 
-// audio link struct for unmarshalling data
-type audioLink struct {
+// AudioLink struct for unmarshalling data
+type AudioLink struct {
 	URL string `json:"url"`
 }
 
 // ExtractSong queries the SoundCloud api and receives a m3u8 file, then binds the segments received into a .mp3 file
-// TODO: implement tests
 func ExtractSong(url string) {
+	soundcloud := NewClient()
 
-	// request to user inputed SoundCloud URL
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatalln(err)
-	}
-	// response
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
-	// parse the response data to grab the song name
-	songname := GetTitle(body)
+	// set Non Hacker User Agent
+	req.Header.Set("Accept", soundcloud.userAgent)
 
-	// parse the response data to grab the artwork image and url
-	_, image := GetArtwork(body)
-
-	// parse the response data and make a reqeust to receive clien_id embedded in the javascript
-	clientID := GetClientID(body)
-
-	// TODO improve pattern for finding encrypted string ID
-	var re = regexp.MustCompile(`https:\/\/api-v2.*\/stream\/hls`) // pattern for finding encrypted string ID
-	// TODO not needed if encrypted string ID regex pattern is improved
-	var ree = regexp.MustCompile(`.+?(stream)`) // pattern for finding stream URL
-
-	streamURL := re.FindString(string(body)) // stream URL
-
-	baseURL := ree.FindString(streamURL) // baseURL ex: https://api-v2.soundcloud.com/media/soundcloud:tracks:816595765/0ad937d5-a278-4b36-b128-220ac89aec04/stream
-
-	// TODO: replace with format string instead of concatenation
-	requestURL := baseURL + "/hls?client_id=" + clientID // API query string ex: https://api-v2.soundcloud.com/media/soundcloud:tracks:805856467/ddfb7463-50f1-476c-9010-729235958822/stream/hls?client_id=iY8sfHHuO2UsXy1QOlxthZoMJEY9v0eI
-
-	// query API
-	r, err := http.Get(requestURL)
+	resp, err := soundcloud.Client.Do(req)
 	if err != nil {
-		red := color.New(color.FgRed).SprintFunc()
-		fmt.Printf("%s Error making request to API %s\n", red("[-]"), err)
+		log.Println(err)
 	}
 
-	// API response returns a m3u8 file embedded in URL
-	m3u8Reponse, err := ioutil.ReadAll(r.Body)
+	//body, _ := io.ReadAll(resp.Body)
+	//log.Println(string(body))
+
+	// parse html
+	doc, err := htmlquery.Parse(resp.Body)
 	if err != nil {
-		red := color.New(color.FgRed).SprintFunc()
-		fmt.Printf("%s Error creating reader from api response %s\n", red("[-]"), err)
+		log.Println(err)
 	}
 
-	var a audioLink
+	streamURL, err := soundcloud.ConstructStreamURL(doc)
+	if err != nil {
+		log.Println(err)
+	}
 
-	// unmarshal json data from response
-	audioerr := json.Unmarshal(m3u8Reponse, &a)
-	if audioerr != nil {
-		red := color.New(color.FgRed).SprintFunc()
-		fmt.Printf("%s Error unmarshalling API response: %s\n", red("[-]"), audioerr)
+	log.Println(streamURL)
+
+	songName, err := soundcloud.GetTitle(doc)
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println(songName)
+
+	artwork, err := soundcloud.GetArtwork(doc)
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println(artwork)
+
+	// Get the response from the URL
+	streamResp, err := http.Get(streamURL)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer streamResp.Body.Close()
+
+	// Read the body of the response
+	body, err := ioutil.ReadAll(streamResp.Body)
+	if err != nil {
+		log.Println("Error reading response body:", err)
+		return
+	}
+
+	// Unmarshal the JSON into the struct
+	var audioResp AudioLink
+	err = json.Unmarshal(body, &audioResp)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+		return
 	}
 
 	// merge segments
-	mp3.Merge(a.URL, songname)
+	mp3.Merge(audioResp.URL, songName)
 
+	artworkResp, err := http.Get(artwork)
+	image, err := ioutil.ReadAll(artworkResp.Body)
+	if err != nil {
+		log.Println(err)
+	}
 	// set cover image for mp3 file
 	// TODO: put this code somewhere so that the image gets set at the same time as the song data is being written for smoother transition
-	mp3.SetCoverImage(songname+".mp3", image)
+	mp3.SetCoverImage(songName+".mp3", image)
 }
