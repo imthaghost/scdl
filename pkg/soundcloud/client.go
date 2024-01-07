@@ -10,6 +10,9 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// #g_id_intermediate_iframe
+// //*[@id="g_id_intermediate_iframe"]
+
 // GetClientID returns a the new generated client_id when a request is made to SoundCloud's API
 // TODO implment tests
 func GetClientID(data []byte) string {
