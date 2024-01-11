@@ -48,7 +48,7 @@ changelog:
 
 # Homebrew configuration
 brews:
-  - tap:
+  - repository:
       owner: imthaghost
       name: homebrew-scdl
     folder: Formula
