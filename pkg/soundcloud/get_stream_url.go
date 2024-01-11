@@ -26,7 +26,7 @@ func (s *Soundcloud) ConstructStreamURL(doc *html.Node) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	trackID, streamToken, err := getTrackInfo(hlsStreamURL)
 
 	// construct stream url

@@ -1,9 +1,6 @@
-# This is a basic workflow to help you get started with Actions
 name: CI
 
-# Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [master]
   pull_request:
@@ -16,10 +13,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@master
-      - name: Go 1.17.2
+      - name: Go 1.21.4
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17.2
+          go-version: 1.21.4
       - name: SoundCloud Package
         run: go test pkg/soundcloud/* -v
       - name: Utils Package

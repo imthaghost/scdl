@@ -37,7 +37,8 @@ var (
 func Execute() {
 
 	// Persistent Flags
-	rootCmd.PersistentFlags().BoolVarP(&Find, "search", "s", false, "Option for searching for songs")
+	// TODO: implement search functionality
+	//rootCmd.PersistentFlags().BoolVarP(&Find, "search", "s", false, "Option for searching for songs")
 
 	// Execute the command :)
 	if err := rootCmd.Execute(); err != nil {

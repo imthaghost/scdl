@@ -10,13 +10,9 @@ import (
 	"net/http"
 )
 
-// AudioLink struct for unmarshalling data
-type AudioLink struct {
-	URL string `json:"url"`
-}
-
-// ExtractSong queries the SoundCloud api and receives a m3u8 file, then binds the segments received into a .mp3 file
-func ExtractSong(url string) {
+// Download queries the SoundCloud api and receives a m3u8 file, then binds the segments received into a .mp3 file
+func Download(url string) {
+	// TODO: This client should be created higher up in the stack
 	soundcloud := NewClient()
 
 	req, err := http.NewRequest("GET", url, nil)

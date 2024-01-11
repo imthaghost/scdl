@@ -11,6 +11,7 @@ import (
 
 // GetHLSURL gets the HLS URL from the SoundCloud song URL
 func (s *Soundcloud) GetHLSURL(doc *html.Node) (string, error) {
+	// TODO: This function is hideous. Refactor it.
 	// Declare the variable to hold the HLS URL
 	var hlsURL string
 
