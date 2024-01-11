@@ -17,7 +17,6 @@ type Assert struct {
 
 // NewAssert Creates and returns a String processing methods's pointer.
 func NewAssert() *Assert {
-
 	obj := &Assert{}
 	obj.plib = NewStringProc()
 
@@ -26,29 +25,26 @@ func NewAssert() *Assert {
 	return obj
 }
 
-//TurnOnUnitTestMode is turn on unitTestMode
+// TurnOnUnitTestMode is turn on unitTestMode
 func (a *Assert) TurnOnUnitTestMode() {
-
 	a.mutx.Lock()
 	defer a.mutx.Unlock()
 	a.unitTestMode = true
 }
 
-//TurnOffUnitTestMode is turn off unitTestMode
+// TurnOffUnitTestMode is turn off unitTestMode
 func (a *Assert) TurnOffUnitTestMode() {
-
 	a.mutx.Lock()
 	defer a.mutx.Unlock()
 	a.unitTestMode = false
 }
 
-//printMsg is equivalent to t.Errorf include other information for easy debug
+// printMsg is equivalent to t.Errorf include other information for easy debug
 func (a *Assert) printMsg(t *testing.T, v1 interface{}, v2 interface{}, msgfmt string, args ...interface{}) {
-
 	outf := t.Errorf
 	out := t.Error
 
-	if !a.unitTestMode { //assertion methods test on go test
+	if !a.unitTestMode { // assertion methods test on go test
 		outf = t.Logf
 		out = t.Log
 		t.Log("*** The following message is just failure testing ***")
@@ -102,9 +98,8 @@ func (a *Assert) isComparableNum(t *testing.T, v1 interface{}, v2 interface{}) b
 }
 */
 
-//numericTypeUpCase converts the any numeric type to upsize type of that
+// numericTypeUpCase converts the any numeric type to upsize type of that
 func (a *Assert) numericTypeUpCase(val interface{}) (int64, uint64, float64, bool) {
-
 	var tmpint int64
 	var tmpuint uint64
 	var tmpfloat float64
@@ -141,9 +136,8 @@ func (a *Assert) numericTypeUpCase(val interface{}) (int64, uint64, float64, boo
 	return tmpint, tmpuint, tmpfloat, true
 }
 
-//AssertLog formats its arguments using default formatting, analogous to t.Log
+// AssertLog formats its arguments using default formatting, analogous to t.Log
 func (a *Assert) AssertLog(t *testing.T, err error, msgfmt string, args ...interface{}) {
-
 	if err != nil {
 		t.Logf("Error : %v", err)
 	}
@@ -155,9 +149,8 @@ func (a *Assert) AssertLog(t *testing.T, err error, msgfmt string, args ...inter
 	}
 }
 
-//AssertEquals asserts that two objects are equal.
+// AssertEquals asserts that two objects are equal.
 func (a *Assert) AssertEquals(t *testing.T, v1 interface{}, v2 interface{}, msgfmt string, args ...interface{}) {
-
 	ok, err := a.plib.AnyCompare(v1, v2)
 	if err != nil {
 		a.printMsg(t, v1, v2, err.Error())
@@ -168,50 +161,44 @@ func (a *Assert) AssertEquals(t *testing.T, v1 interface{}, v2 interface{}, msgf
 	}
 }
 
-//AssertNotEquals asserts that two objects are not equal.
+// AssertNotEquals asserts that two objects are not equal.
 func (a *Assert) AssertNotEquals(t *testing.T, v1 interface{}, v2 interface{}, msgfmt string, args ...interface{}) {
-
 	_, err := a.plib.AnyCompare(v1, v2)
 	if err == nil && v1 == v2 {
 		a.printMsg(t, v1, v2, msgfmt, args...)
 	}
 }
 
-//AssertFalse asserts that the specified value is false.
+// AssertFalse asserts that the specified value is false.
 func (a *Assert) AssertFalse(t *testing.T, v1 bool, msgfmt string, args ...interface{}) {
-
 	if v1 {
 		a.printMsg(t, v1, nil, msgfmt, args...)
 	}
 }
 
-//AssertTrue asserts that the specified value is true.
+// AssertTrue asserts that the specified value is true.
 func (a *Assert) AssertTrue(t *testing.T, v1 bool, msgfmt string, args ...interface{}) {
-
 	if !v1 {
 		a.printMsg(t, v1, nil, msgfmt, args...)
 	}
 }
 
-//AssertNil asserts that the specified value is nil.
+// AssertNil asserts that the specified value is nil.
 func (a *Assert) AssertNil(t *testing.T, v1 interface{}, msgfmt string, args ...interface{}) {
-
 	if v1 != nil {
 		a.printMsg(t, v1, nil, msgfmt, args...)
 	}
 }
 
-//AssertNotNil asserts that the specified value isn't nil.
+// AssertNotNil asserts that the specified value isn't nil.
 func (a *Assert) AssertNotNil(t *testing.T, v1 interface{}, msgfmt string, args ...interface{}) {
-
 	if v1 == nil {
 		a.printMsg(t, v1, nil, msgfmt, args...)
 	}
 }
 
-//AssertLessThan asserts that the specified value are v1 less than v2
+// AssertLessThan asserts that the specified value are v1 less than v2
 func (a *Assert) AssertLessThan(t *testing.T, v1 interface{}, v2 interface{}, msgfmt string, args ...interface{}) {
-
 	/*
 		if !a.isComparableNum(t, v1, v2) {
 			return
@@ -246,9 +233,8 @@ func (a *Assert) AssertLessThan(t *testing.T, v1 interface{}, v2 interface{}, ms
 	}
 }
 
-//AssertLessThanEqualTo asserts that the specified value are v1 less than v2 or equal to
+// AssertLessThanEqualTo asserts that the specified value are v1 less than v2 or equal to
 func (a *Assert) AssertLessThanEqualTo(t *testing.T, v1 interface{}, v2 interface{}, msgfmt string, args ...interface{}) {
-
 	/*
 		if !a.isComparableNum(t, v1, v2) {
 			return
@@ -283,9 +269,8 @@ func (a *Assert) AssertLessThanEqualTo(t *testing.T, v1 interface{}, v2 interfac
 	}
 }
 
-//AssertGreaterThan nsserts that the specified value are v1 greater than v2
+// AssertGreaterThan nsserts that the specified value are v1 greater than v2
 func (a *Assert) AssertGreaterThan(t *testing.T, v1 interface{}, v2 interface{}, msgfmt string, args ...interface{}) {
-
 	/*
 		if !a.isComparableNum(t, v1, v2) {
 			return
@@ -320,9 +305,8 @@ func (a *Assert) AssertGreaterThan(t *testing.T, v1 interface{}, v2 interface{},
 	}
 }
 
-//AssertGreaterThanEqualTo asserts that the specified value are v1 greater than v2 or equal to
+// AssertGreaterThanEqualTo asserts that the specified value are v1 greater than v2 or equal to
 func (a *Assert) AssertGreaterThanEqualTo(t *testing.T, v1 interface{}, v2 interface{}, msgfmt string, args ...interface{}) {
-
 	/*
 		if !a.isComparableNum(t, v1, v2) {
 			return
@@ -357,9 +341,8 @@ func (a *Assert) AssertGreaterThanEqualTo(t *testing.T, v1 interface{}, v2 inter
 	}
 }
 
-//AssertLengthOf asserts that object has a length property with the expected value.
+// AssertLengthOf asserts that object has a length property with the expected value.
 func (a *Assert) AssertLengthOf(t *testing.T, v1 interface{}, v2 interface{}, msgfmt string, args ...interface{}) {
-
 	var tmplen int
 	retval := false
 

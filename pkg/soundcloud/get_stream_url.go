@@ -3,7 +3,6 @@ package soundcloud
 import (
 	"fmt"
 	"golang.org/x/net/html"
-	"log"
 	"strings"
 )
 
@@ -27,21 +26,13 @@ func (s *Soundcloud) ConstructStreamURL(doc *html.Node) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Println("Track Auth: ", trackAuth)
-	log.Println("Client ID: ", clientID)
-	log.Println("HLS Stream URL: ", hlsStreamURL)
-
+	
 	trackID, streamToken, err := getTrackInfo(hlsStreamURL)
 
 	// construct stream url
 	baseURL := "https://api-v2.soundcloud.com/media/soundcloud:tracks:%s/%s/stream/hls?client_id=%s&track_authorization=%s"
 
 	streamURL := fmt.Sprintf(baseURL, trackID, streamToken, clientID, trackAuth)
-
-	log.Println("Track ID: ", trackID)
-	log.Println("Stream Token: ", streamToken)
-
-	log.Println("Stream URL: ", streamURL)
 
 	return streamURL, nil
 }

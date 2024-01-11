@@ -1,0 +1,13 @@
+version = 1
+
+[[analyzers]]
+name = "go"
+enabled = true
+
+  [analyzers.meta]
+  import_root = "github.com/torden/go-strutil"
+  dependencies_vendored = true
+
+[[transformers]]
+name = "gofumpt"
+enabled = true

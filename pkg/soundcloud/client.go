@@ -38,6 +38,7 @@ func GetClientID(data []byte) string {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	var re = regexp.MustCompile(`client_id:"(.+)",env`) // pattern for finding encrypted string ID
 	clientString := re.FindString(string(body))         // stream URL
 	var ree = regexp.MustCompile(`"([^"].*?)"`)

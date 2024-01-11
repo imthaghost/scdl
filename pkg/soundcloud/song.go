@@ -32,9 +32,6 @@ func ExtractSong(url string) {
 		log.Println(err)
 	}
 
-	//body, _ := io.ReadAll(resp.Body)
-	//log.Println(string(body))
-
 	// parse html
 	doc, err := htmlquery.Parse(resp.Body)
 	if err != nil {
@@ -46,21 +43,15 @@ func ExtractSong(url string) {
 		log.Println(err)
 	}
 
-	log.Println(streamURL)
-
 	songName, err := soundcloud.GetTitle(doc)
 	if err != nil {
 		log.Println(err)
 	}
 
-	log.Println(songName)
-
 	artwork, err := soundcloud.GetArtwork(doc)
 	if err != nil {
 		log.Println(err)
 	}
-
-	log.Println(artwork)
 
 	// Get the response from the URL
 	streamResp, err := http.Get(streamURL)
@@ -93,7 +84,7 @@ func ExtractSong(url string) {
 	if err != nil {
 		log.Println(err)
 	}
+
 	// set cover image for mp3 file
-	// TODO: put this code somewhere so that the image gets set at the same time as the song data is being written for smoother transition
 	mp3.SetCoverImage(songName+".mp3", image)
 }

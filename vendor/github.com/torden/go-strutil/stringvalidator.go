@@ -10,9 +10,11 @@ import (
 	"strings"
 )
 
-var emailPattern = regexp.MustCompile("^[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?$")
-var domainPattern = regexp.MustCompile(`^(([a-zA-Z0-9-\p{L}]{1,63}\.)?(xn--)?[a-zA-Z0-9\p{L}]+(-[a-zA-Z0-9\p{L}]+)*\.)+[a-zA-Z\p{L}]{2,63}$`)
-var urlPattern = regexp.MustCompile(`^((((https?|ftps?|gopher|telnet|nntp)://)|(mailto:|news:))(%[0-9A-Fa-f]{2}|[-()_.!~*';/?:@#&=+$,A-Za-z0-9\p{L}])+)([).!';/?:,][[:blank:]])?$`)
+var (
+	emailPattern  = regexp.MustCompile("^[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?$")
+	domainPattern = regexp.MustCompile(`^(([a-zA-Z0-9-\p{L}]{1,63}\.)?(xn--)?[a-zA-Z0-9\p{L}]+(-[a-zA-Z0-9\p{L}]+)*\.)+[a-zA-Z\p{L}]{2,63}$`)
+	urlPattern    = regexp.MustCompile(`^((((https?|ftps?|gopher|telnet|nntp)://)|(mailto:|news:))(%[0-9A-Fa-f]{2}|[-()_.!~*';/?:@#&=+$,A-Za-z0-9\p{L}])+)([).!';/?:,][[:blank:]])?$`)
+)
 
 // StringValidator is String processing methods, All operations on this object
 type StringValidator struct{}
@@ -69,9 +71,7 @@ const (
 
 // IsValidIPAddr is Validates whether the value to be exactly a given validation type (IPv4, IPv6, IPv4MappedIPv6, IPv4CIDR, IPv6CIDR, IPv4MappedIPv6CIDR OR IPAny)
 func (s *StringValidator) IsValidIPAddr(str string, cktypes ...int) (bool, error) {
-
 	for _, cktype := range cktypes {
-
 		if cktype != IPAny && cktype != IPv4 && cktype != IPv6 && cktype != IPv4MappedIPv6 && cktype != IPv4CIDR && cktype != IPv6CIDR && cktype != IPv4MappedIPv6CIDR {
 			return false, errors.New("Invalid Options")
 		}
@@ -81,9 +81,7 @@ func (s *StringValidator) IsValidIPAddr(str string, cktypes ...int) (bool, error
 	ret := getIPType(str, l)
 
 	for _, ck := range cktypes {
-
 		if ret != none && (ck == ret || ck == IPAny) {
-
 			switch ret {
 			case IPv4, IPv6, IPv4MappedIPv6:
 				ip := net.ParseIP(str)
@@ -106,13 +104,12 @@ func (s *StringValidator) IsValidIPAddr(str string, cktypes ...int) (bool, error
 
 // isCIDR is Validates whether the value IP Address with CIRD
 func isCIDR(str string, l int) bool {
-
 	if str[l-3] == '/' || str[l-2] == '/' {
 
 		cidrBit := strings.Split(str, "/")
 		if 2 == len(cidrBit) {
 			bit, err := strconv.Atoi(cidrBit[1])
-			//IPv4 : 0~32, IPv6 : 0 ~ 128
+			// IPv4 : 0~32, IPv6 : 0 ~ 128
 			if err == nil && bit >= 0 && bit <= 128 {
 				return true
 			}
@@ -124,8 +121,7 @@ func isCIDR(str string, l int) bool {
 
 // getIPType is Get a type of IP Address
 func getIPType(str string, l int) int {
-
-	if l < 3 { //least 3 chars (::F)
+	if l < 3 { // least 3 chars (::F)
 		return none
 	}
 
@@ -154,29 +150,30 @@ func getIPType(str string, l int) int {
 	return none
 }
 
-const regexDenyFileNameCharList = `[\x00-\x1f|\x21-\x2c|\x3b-\x40|\x5b-\x5e|\x60|\x7b-\x7f]+`
-const regexDenyFileName = `|\x2e\x2e\x2f+`
+const (
+	regexDenyFileNameCharList = `[\x00-\x1f|\x21-\x2c|\x3b-\x40|\x5b-\x5e|\x60|\x7b-\x7f]+`
+	regexDenyFileName         = `|\x2e\x2e\x2f+`
+)
 
-var checkAllowRelativePath = regexp.MustCompile(`(?m)(` + regexDenyFileNameCharList + `)`)
-var checkDenyRelativePath = regexp.MustCompile(`(?m)(` + regexDenyFileNameCharList + regexDenyFileName + `)`)
+var (
+	checkAllowRelativePath = regexp.MustCompile(`(?m)(` + regexDenyFileNameCharList + `)`)
+	checkDenyRelativePath  = regexp.MustCompile(`(?m)(` + regexDenyFileNameCharList + regexDenyFileName + `)`)
+)
 
 // IsValidFilePath is Validates whether the value is a valid FilePath without relative path
 func (s *StringValidator) IsValidFilePath(str string) bool {
-
 	ret := checkDenyRelativePath.MatchString(str)
 	return !ret
 }
 
 // IsValidFilePathWithRelativePath is Validates whether the value is a valid FilePath (allow with relative path)
 func (s *StringValidator) IsValidFilePathWithRelativePath(str string) bool {
-
 	ret := checkAllowRelativePath.MatchString(str)
 	return !ret
 }
 
 // IsPureTextStrict is Validates whether the value is a pure text, Validation use native
 func (s *StringValidator) IsPureTextStrict(str string) (bool, error) {
-
 	l := len(str)
 
 	for i := 0; i < l; i++ {
@@ -184,7 +181,7 @@ func (s *StringValidator) IsPureTextStrict(str string) (bool, error) {
 		c := str[i]
 
 		// deny : control char (00-31 without 9(TAB) and Single 10(LF),13(CR)
-		//if c >= 0 && c <= 31 && c != 9 && c != 10 && c != 13 { unsinged value is always >= 0
+		// if c >= 0 && c <= 31 && c != 9 && c != 10 && c != 13 { unsinged value is always >= 0
 		if c <= 31 && c != 9 && c != 10 && c != 13 {
 			return false, errors.New("Detect Control Character")
 		}
@@ -194,7 +191,7 @@ func (s *StringValidator) IsPureTextStrict(str string) (bool, error) {
 			return false, errors.New("Detect Control Character (DEL)")
 		}
 
-		//deny : html tag (< ~ >)
+		// deny : html tag (< ~ >)
 		if c == 60 {
 
 			ds := 0
@@ -203,7 +200,7 @@ func (s *StringValidator) IsPureTextStrict(str string) (bool, error) {
 				// 60 (<) , 47(/) | 33(!) | 63(?)
 				if str[n] == 60 && n+1 <= l && (str[n+1] == 47 || str[n+1] == 33 || str[n+1] == 63) {
 					ds = 1
-					n += 3 //jump to next char
+					n += 3 // jump to next char
 				}
 
 				// 62 (>)
@@ -213,7 +210,7 @@ func (s *StringValidator) IsPureTextStrict(str string) (bool, error) {
 			}
 		}
 
-		//deby : html encoded tag (&xxx;)
+		// deby : html encoded tag (&xxx;)
 		if c == 38 && i+1 <= l && str[i+1] != 35 {
 
 			max := i + 64
@@ -243,7 +240,6 @@ var controlcharPattern = regexp.MustCompile(`(?im)([\x00-\x08\x0B\x0C\x0E-\x1F\x
 
 // IsPureTextNormal is Validates whether the value is a pure text, Validation use Regular Expressions
 func (s *StringValidator) IsPureTextNormal(str string) (bool, error) {
-
 	decodedStr := html.UnescapeString(str)
 
 	matchedUrlencoded := urlencodedPattern.MatchString(decodedStr)

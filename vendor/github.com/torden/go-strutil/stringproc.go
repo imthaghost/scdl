@@ -20,13 +20,16 @@ import (
 
 // referrer to https://golang.org/pkg/regexp/syntax/
 var numericPattern = regexp.MustCompile(`^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$`)
-var tagElementsPattern = regexp.MustCompile(`(?ims)(?P<tag><(/*\s*|\?*|\!*)(figcaption|expression|blockquote|plaintext|textarea|progress|optgroup|noscript|noframes|menuitem|frameset|fieldset|!DOCTYPE|datalist|colgroup|behavior|basefont|summary|section|isindex|details|caption|bgsound|article|address|acronym|strong|strike|source|select|script|output|option|object|legend|keygen|ilayer|iframe|header|footer|figure|dialog|center|canvas|button|applet|video|track|title|thead|tfoot|tbody|table|style|small|param|meter|layer|label|input|frame|embed|blink|audio|aside|alert|time|span|samp|ruby|meta|menu|mark|main|link|html|head|form|font|code|cite|body|base|area|abbr|xss|xml|wbr|var|svg|sup|sub|pre|nav|map|kbd|ins|img|div|dir|dfn|del|col|big|bdo|bdi|!--|ul|tt|tr|th|td|rt|rp|ol|li|hr|em|dt|dl|dd|br|u|s|q|p|i|b|a|(h[0-9]+))([^><]*)([><]*))`)
-var whiteSpacePattern = regexp.MustCompile(`(?im)\s{2,}`)
-var entityEncodedPattern = regexp.MustCompile(`(?ims)(&(?:[a-z0-9]{2,8}|#[0-9]{2,3});)`)
-var urlEncodedPattern = regexp.MustCompile(`(?ims)(%[a-zA-Z0-9]{2})`)
+
+var (
+	tagElementsPattern   = regexp.MustCompile(`(?ims)(?P<tag><(/*\s*|\?*|\!*)(figcaption|expression|blockquote|plaintext|textarea|progress|optgroup|noscript|noframes|menuitem|frameset|fieldset|!DOCTYPE|datalist|colgroup|behavior|basefont|summary|section|isindex|details|caption|bgsound|article|address|acronym|strong|strike|source|select|script|output|option|object|legend|keygen|ilayer|iframe|header|footer|figure|dialog|center|canvas|button|applet|video|track|title|thead|tfoot|tbody|table|style|small|param|meter|layer|label|input|frame|embed|blink|audio|aside|alert|time|span|samp|ruby|meta|menu|mark|main|link|html|head|form|font|code|cite|body|base|area|abbr|xss|xml|wbr|var|svg|sup|sub|pre|nav|map|kbd|ins|img|div|dir|dfn|del|col|big|bdo|bdi|!--|ul|tt|tr|th|td|rt|rp|ol|li|hr|em|dt|dl|dd|br|u|s|q|p|i|b|a|(h[0-9]+))([^><]*)([><]*))`)
+	whiteSpacePattern    = regexp.MustCompile(`(?im)\s{2,}`)
+	entityEncodedPattern = regexp.MustCompile(`(?ims)(&(?:[a-z0-9]{2,8}|#[0-9]{2,3});)`)
+	urlEncodedPattern    = regexp.MustCompile(`(?ims)(%[a-zA-Z0-9]{2})`)
+)
 
 // for debug
-//var detectUnicodeEntities = regexp.MustCompile(`(?ims)u([0-9a-z]{4})`)
+// var detectUnicodeEntities = regexp.MustCompile(`(?ims)u([0-9a-z]{4})`)
 
 // StringProc is String processing methods, All operations on this object
 type StringProc struct {
@@ -40,18 +43,16 @@ func NewStringProc() *StringProc {
 
 // AddSlashes is quote string with slashes
 func (s *StringProc) AddSlashes(str string) string {
-
 	l := len(str)
 
-	buf := make([]byte, 0, l*2) //prealloca
+	buf := make([]byte, 0, l*2) // prealloca
 
 	for i := 0; i < l; i++ {
 
 		buf = append(buf, str[i])
 
 		switch str[i] {
-
-		case 92: //Dec : /
+		case 92: // Dec : /
 
 			if l >= i+1 {
 				buf = append(buf, 92)
@@ -68,9 +69,8 @@ func (s *StringProc) AddSlashes(str string) string {
 
 // StripSlashes is Un-quotes a quoted string
 func (s *StringProc) StripSlashes(str string) string {
-
 	l := len(str)
-	buf := make([]byte, 0, l) //prealloca
+	buf := make([]byte, 0, l) // prealloca
 
 	for i := 0; i < l; i++ {
 
@@ -81,28 +81,25 @@ func (s *StringProc) StripSlashes(str string) string {
 	}
 
 	return string(buf)
-
 }
 
 // Nl2Br is breakstr inserted before looks like space (CRLF , LFCR, SPACE, NL)
 func (s *StringProc) Nl2Br(str string) string {
-
 	// BenchmarkNl2Br-8                   	10000000	      3398 ns/op
 	// BenchmarkNl2BrUseStringReplace-8   	10000000	      4535 ns/op
 	brtag := []byte("<br />")
 	l := len(str)
-	buf := make([]byte, 0, l) //prealloca
+	buf := make([]byte, 0, l) // prealloca
 
 	for i := 0; i < l; i++ {
-
 		switch str[i] {
 
-		case 10, 13: //NL or CR
+		case 10, 13: // NL or CR
 
 			buf = append(buf, brtag...)
 
 			if l >= i+1 {
-				if l > i+1 && (str[i+1] == 10 || str[i+1] == 13) { //NL+CR or CR+NL
+				if l > i+1 && (str[i+1] == 10 || str[i+1] == 13) { // NL+CR or CR+NL
 					i++
 				}
 			}
@@ -116,16 +113,14 @@ func (s *StringProc) Nl2Br(str string) string {
 
 // Br2Nl is replaces HTML line breaks to a newline
 func (s *StringProc) Br2Nl(str string) string {
-
 	// <br> , <br /> , <br/>
 	// <BR> , <BR /> , <BR/>
 	nlchar := []byte("\n")
 
 	l := len(str)
-	buf := make([]byte, 0, l) //prealloca
+	buf := make([]byte, 0, l) // prealloca
 
 	for i := 0; i < l; i++ {
-
 		switch str[i] {
 
 		case 60: //<
@@ -172,7 +167,6 @@ func (s *StringProc) Br2Nl(str string) string {
 
 // WordWrapSimple is Wraps a string to a given number of characters using break characters (TAB, SPACE)
 func (s *StringProc) WordWrapSimple(str string, wd int, breakstr string) (string, error) {
-
 	if wd < 1 {
 		err := errors.New("wd At least 1 or More")
 		return str, err
@@ -202,7 +196,6 @@ func (s *StringProc) WordWrapSimple(str string, wd int, breakstr string) (string
 
 // WordWrapAround is Wraps a string to a given number of characters using break characters (TAB, SPACE)
 func (s *StringProc) WordWrapAround(str string, wd int, breakstr string) (string, error) {
-
 	if wd < 1 {
 		return "", errors.New("wd At least 1 or More")
 	}
@@ -216,7 +209,7 @@ func (s *StringProc) WordWrapAround(str string, wd int, breakstr string) (string
 	lastspc := make([]int, 0, strl)
 	strpos := 0
 
-	//looking for space or tab
+	// looking for space or tab
 	for _, v := range bufstr {
 
 		if v == 9 || v == 32 {
@@ -227,7 +220,7 @@ func (s *StringProc) WordWrapAround(str string, wd int, breakstr string) (string
 
 	inject := make([]int, 0, strl)
 
-	//looking for break point
+	// looking for break point
 	beforeBp := 0
 	width := wd
 
@@ -244,16 +237,16 @@ func (s *StringProc) WordWrapAround(str string, wd int, breakstr string) (string
 		} else if width < v && len(lastspc) == 1 {
 			inject = append(inject, v)
 		}
-		//fmt.Println()
+		// fmt.Println()
 	}
 
-	//injection
+	// injection
 	breakno := 0
 	loopcnt := 0
 	injectcnt := len(inject)
 	for _, v := range bufstr {
 
-		//fmt.Printf("(%v) %d > %d && %d <= %d\n", v, injectcnt, breakno, inject[breakno], loopcnt)
+		// fmt.Printf("(%v) %d > %d && %d <= %d\n", v, injectcnt, breakno, inject[breakno], loopcnt)
 		if injectcnt > breakno && inject[breakno] == loopcnt {
 
 			buf = append(buf, []byte(breakstr)...)
@@ -271,7 +264,6 @@ func (s *StringProc) WordWrapAround(str string, wd int, breakstr string) (string
 }
 
 func (s *StringProc) numberToString(obj interface{}) (string, error) {
-
 	var strNum string
 
 	switch obj.(type) {
@@ -320,8 +312,7 @@ func (s *StringProc) numberToString(obj interface{}) (string, error) {
 // NumberFmt is format a number with english notation grouped thousands
 // TODO : support other country notation
 func (s *StringProc) NumberFmt(obj interface{}) (string, error) {
-
-	//check : complex
+	// check : complex
 	switch obj.(type) {
 	case complex64, complex128:
 		return "", fmt.Errorf("Not Support obj.(%v)", reflect.TypeOf(obj))
@@ -335,13 +326,13 @@ func (s *StringProc) NumberFmt(obj interface{}) (string, error) {
 	bufbyteStr := []byte(strNum)
 	bufbyteStrLen := len(bufbyteStr)
 
-	//subffix after dot
+	// subffix after dot
 	bufbyteTail := make([]byte, bufbyteStrLen-1)
 
-	//init.
+	// init.
 	var foundDot, foundPos, dotcnt, bufbyteSize int
 
-	//looking for dot
+	// looking for dot
 	for i := bufbyteStrLen - 1; i >= 0; i-- {
 		if bufbyteStr[i] == 46 {
 			copy(bufbyteTail, bufbyteStr[i:])
@@ -351,19 +342,19 @@ func (s *StringProc) NumberFmt(obj interface{}) (string, error) {
 		}
 	}
 
-	//make bufbyte size
-	if foundDot == 0 { //numeric without dot
+	// make bufbyte size
+	if foundDot == 0 { // numeric without dot
 		bufbyteSize = int(math.Ceil(float64(bufbyteStrLen) + float64(bufbyteStrLen)/3))
 		foundDot = bufbyteStrLen
 		foundPos = bufbyteSize - 2
 
 		bufbyteSize--
 
-	} else { //with dot
+	} else { // with dot
 
 		var calFoundDot int
 
-		if bufbyteStr[0] == 45 { //if startwith "-"(45)
+		if bufbyteStr[0] == 45 { // if startwith "-"(45)
 			calFoundDot = foundDot - 1
 		} else {
 			calFoundDot = foundDot
@@ -372,15 +363,15 @@ func (s *StringProc) NumberFmt(obj interface{}) (string, error) {
 		bufbyteSize = int(math.Ceil(float64(calFoundDot) + float64(calFoundDot)/3 + float64(bufbyteStrLen-calFoundDot) - 1))
 	}
 
-	//make a buffer byte
+	// make a buffer byte
 	bufbyte := make([]byte, bufbyteSize)
 
-	//skip : need to dot injection
+	// skip : need to dot injection
 	if 4 > foundDot {
 		return strNum, nil
 	}
 
-	//injection
+	// injection
 	intoPos := foundPos
 	for i := foundDot - 1; i >= 0; i-- {
 		if dotcnt >= 3 && (bufbyteStr[i] >= 48 && bufbyteStr[i] <= 57 || bufbyteStr[i] == 69 || bufbyteStr[i] == 101 || bufbyteStr[i] == 43) {
@@ -393,11 +384,11 @@ func (s *StringProc) NumberFmt(obj interface{}) (string, error) {
 		dotcnt++
 	}
 
-	//into dot to tail
+	// into dot to tail
 	intoPos = foundPos + 1
 	if foundDot != bufbyteStrLen {
 		for _, v := range bufbyteTail {
-			if v == 0 { //NULL
+			if v == 0 { // NULL
 				break
 			}
 
@@ -411,9 +402,9 @@ func (s *StringProc) NumberFmt(obj interface{}) (string, error) {
 
 // padding contol const
 const (
-	PadLeft  = 0 //left padding
-	PadRight = 1 //right padding
-	PadBoth  = 2 //both padding
+	PadLeft  = 0 // left padding
+	PadRight = 1 // right padding
+	PadBoth  = 2 // both padding
 )
 
 // PaddingBoth is Padding method alias with PadBoth Option
@@ -435,7 +426,6 @@ func (s *StringProc) PaddingRight(str string, fill string, mx int) string {
 // BenchmarkPadding-8                   10000000	       271 ns/op
 // BenchmarkPaddingUseStringRepeat-8   	 3000000	       418 ns/op
 func (s *StringProc) Padding(str string, fill string, m int, mx int) string {
-
 	byteStr := []byte(str)
 	byteStrLen := len(byteStr)
 	if byteStrLen >= mx || mx < 1 {
@@ -497,7 +487,6 @@ func (s *StringProc) Padding(str string, fill string, m int, mx int) string {
 // LowerCaseFirstWords is Lowercase the first character of each word in a string
 // INFO : (Support Token Are \t(9)\r(13)\n(10)\f(12)\v(11)\s(32))
 func (s *StringProc) LowerCaseFirstWords(str string) string {
-
 	upper := 1
 	bufbyteStr := []byte(str)
 	retval := make([]byte, len(bufbyteStr))
@@ -521,7 +510,6 @@ func (s *StringProc) LowerCaseFirstWords(str string) string {
 // UpperCaseFirstWords is Uppercase the first character of each word in a string
 // INFO : (Support Token Are \t(9)\r(13)\n(10)\f(12)\v(11)\s(32))
 func (s *StringProc) UpperCaseFirstWords(str string) string {
-
 	upper := 1
 	bufbyteStr := []byte(str)
 	retval := make([]byte, len(bufbyteStr))
@@ -544,7 +532,6 @@ func (s *StringProc) UpperCaseFirstWords(str string) string {
 
 // SwapCaseFirstWords is Switch the first character case of each word in a string
 func (s *StringProc) SwapCaseFirstWords(str string) string {
-
 	upper := 1
 	bufbyteStr := []byte(str)
 	retval := make([]byte, len(bufbyteStr))
@@ -582,16 +569,17 @@ const (
 	CamelCaseLong   // Full Unit characters converted to Camel-case
 )
 
-var sizeStrLowerCaseSingle = []string{"b", "k", "m", "g", "t", "p", "e", "z", "y"}
-var sizeStrLowerCaseDouble = []string{"b", "kb", "mb", "gb", "tb", "pb", "eb", "zb", "yb"}
-var sizeStrUpperCaseSingle = []string{"B", "K", "M", "G", "T", "P", "E", "Z", "Y"}
-var sizeStrUpperCaseDouble = []string{"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"}
-var sizeStrCamelCaseDouble = []string{"B", "Kb", "Mb", "Gb", "Tb", "Eb", "Zb", "Yb"}
-var sizeStrCamelCaseLong = []string{"Byte", "KiloByte", "MegaByte", "GigaByte", "TeraByte", "ExaByte", "ZettaByte", "YottaByte"}
+var (
+	sizeStrLowerCaseSingle = []string{"b", "k", "m", "g", "t", "p", "e", "z", "y"}
+	sizeStrLowerCaseDouble = []string{"b", "kb", "mb", "gb", "tb", "pb", "eb", "zb", "yb"}
+	sizeStrUpperCaseSingle = []string{"B", "K", "M", "G", "T", "P", "E", "Z", "Y"}
+	sizeStrUpperCaseDouble = []string{"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"}
+	sizeStrCamelCaseDouble = []string{"B", "Kb", "Mb", "Gb", "Tb", "Eb", "Zb", "Yb"}
+	sizeStrCamelCaseLong   = []string{"Byte", "KiloByte", "MegaByte", "GigaByte", "TeraByte", "ExaByte", "ZettaByte", "YottaByte"}
+)
 
-//HumanByteSize is Byte Size convert to Easy Readable Size String
+// HumanByteSize is Byte Size convert to Easy Readable Size String
 func (s *StringProc) HumanByteSize(obj interface{}, decimals int, unit uint8) (string, error) {
-
 	if unit < LowerCaseSingle || unit > CamelCaseLong {
 		return "", fmt.Errorf("Not allow unit parameter : %v", unit)
 	}
@@ -671,9 +659,8 @@ func (s *StringProc) HumanByteSize(obj interface{}, decimals int, unit uint8) (s
 	return fmt.Sprintf(decimalsFmt, humanSize, unitStr), nil
 }
 
-//HumanFileSize is File Size convert to Easy Readable Size String
+// HumanFileSize is File Size convert to Easy Readable Size String
 func (s *StringProc) HumanFileSize(filepath string, decimals int, unit uint8) (string, error) {
-
 	fd, err := os.Open(filepath)
 	if err != nil {
 		return "", fmt.Errorf("%v", err)
@@ -695,13 +682,13 @@ func (s *StringProc) HumanFileSize(filepath string, decimals int, unit uint8) (s
 
 // compare with map
 var recursiveDepth = 0
+
 var recursiveDepthKeypList = struct {
 	sync.RWMutex
 	ar []string
 }{ar: make([]string, 32)}
 
 func (s *StringProc) compareMap(compObj1 reflect.Value, compObj2 reflect.Value) (bool, error) {
-
 	recursiveDepth++
 	var valueCompareErr bool
 
@@ -711,50 +698,50 @@ func (s *StringProc) compareMap(compObj1 reflect.Value, compObj2 reflect.Value) 
 		recursiveDepthKeypList.ar = append(recursiveDepthKeypList.ar, k.String())
 		recursiveDepthKeypList.Unlock()
 
-		//check : Type
+		// check : Type
 		if compObj1.MapIndex(k).Kind() != compObj2.MapIndex(k).Kind() {
 			return false, fmt.Errorf("Different Type : (obj1[%v] type is `%v`) != (obj2[%v] type is `%v`)", k, compObj1.MapIndex(k).Kind(), k, compObj2.MapIndex(k).Kind())
 		}
 
 		switch compObj1.MapIndex(k).Kind() {
 
-		//String
+		// String
 		case reflect.String:
 			if compObj1.MapIndex(k).String() != compObj2.MapIndex(k).String() {
 				valueCompareErr = true
 			}
 
-		//Integer
+		// Integer
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			if compObj1.MapIndex(k).Int() != compObj2.MapIndex(k).Int() {
 				valueCompareErr = true
 			}
 
-		//Un-signed Integer
+		// Un-signed Integer
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			if compObj1.MapIndex(k).Uint() != compObj2.MapIndex(k).Uint() {
 				valueCompareErr = true
 			}
 
-		//Float
+		// Float
 		case reflect.Float32, reflect.Float64:
 			if compObj1.MapIndex(k).Float() != compObj2.MapIndex(k).Float() {
 				valueCompareErr = true
 			}
 
-		//Boolean
+		// Boolean
 		case reflect.Bool:
 			if compObj1.MapIndex(k).Bool() != compObj2.MapIndex(k).Bool() {
 				valueCompareErr = true
 			}
 
-		//Complex
+		// Complex
 		case reflect.Complex64, reflect.Complex128:
 			if compObj1.MapIndex(k).Complex() != compObj2.MapIndex(k).Complex() {
 				valueCompareErr = true
 			}
 
-		//Map : recursive loop
+		// Map : recursive loop
 		case reflect.Map:
 			retval, err := s.compareMap(compObj1.MapIndex(k), compObj2.MapIndex(k))
 			if !retval {
@@ -785,7 +772,6 @@ func (s *StringProc) compareMap(compObj1 reflect.Value, compObj2 reflect.Value) 
 // TODO : support interface, struct ...
 // NOTE : Not safe , Not Test Complete. Require more test data based on the complex dataset.
 func (s *StringProc) AnyCompare(obj1 interface{}, obj2 interface{}) (bool, error) {
-
 	compObjVal1 := reflect.ValueOf(obj1)
 	compObjVal2 := reflect.ValueOf(obj2)
 
@@ -840,7 +826,7 @@ func (s *StringProc) AnyCompare(obj1 interface{}, obj2 interface{}) (bool, error
 
 		default:
 			return reflect.DeepEqual(obj1, obj2), nil
-			//return false, fmt.Errorf("Not Support Compare : (obj1[%v]) , (obj2[%v])", compObjVal1.Kind(), compObjVal2.Kind())
+			// return false, fmt.Errorf("Not Support Compare : (obj1[%v]) , (obj2[%v])", compObjVal1.Kind(), compObjVal2.Kind())
 
 		}
 	}
@@ -848,15 +834,14 @@ func (s *StringProc) AnyCompare(obj1 interface{}, obj2 interface{}) (bool, error
 }
 
 func (s *StringProc) isHex(c byte) bool {
-
-	if (c >= 48 && c <= 57) || (c >= 65 && c <= 70) || (c >= 97 && c <= 102) { //0~9, a~f, A~F
+	if (c >= 48 && c <= 57) || (c >= 65 && c <= 70) || (c >= 97 && c <= 102) { // 0~9, a~f, A~F
 		return true
 	}
 
 	return false
 }
 
-func (s *StringProc) unHex(c byte) byte { //from golang. unhex
+func (s *StringProc) unHex(c byte) byte { // from golang. unhex
 
 	switch {
 	case '0' <= c && c <= '9':
@@ -872,12 +857,10 @@ func (s *StringProc) unHex(c byte) byte { //from golang. unhex
 
 // DecodeUnicodeEntities Decodes Unicode Entities
 func (s *StringProc) DecodeUnicodeEntities(val string) (string, error) {
-
 	var tmpret []byte
 
 	l := len(val)
 	for i := 0; i < l; i++ {
-
 		if val[i] == 37 && val[i+1] == 117 && l >= i+6 { // % + u
 
 			var tmpval []byte
@@ -890,9 +873,9 @@ func (s *StringProc) DecodeUnicodeEntities(val string) (string, error) {
 
 			tmprune := []byte(string(rune(runeval)))
 			tmpret = append(tmpret, tmprune...)
-			i += 5 //jump %uXXXX
+			i += 5 // jump %uXXXX
 
-		} else if val[i] == 37 { //control character or other
+		} else if val[i] == 37 { // control character or other
 			tmpret = append(tmpret, s.unHex(val[i+1])<<4|s.unHex(val[i+2]))
 			i += 2
 		} else {
@@ -906,7 +889,6 @@ func (s *StringProc) DecodeUnicodeEntities(val string) (string, error) {
 // DecodeURLEncoded Decodes URL-encoded string (including unicode entities)
 // NOTE : golang.url.unescape not support unicode entities (%uXXXX)
 func (s *StringProc) DecodeURLEncoded(val string) (string, error) {
-
 	var tmpret []byte
 
 	l := len(val)
@@ -949,11 +931,10 @@ func (s *StringProc) DecodeURLEncoded(val string) (string, error) {
 
 // StripTags is remove all tag in string
 func (s *StringProc) StripTags(str string) (string, error) {
-
 	var retval bool
 	notproccnt := 0
 
-	//looking for html entities code in str
+	// looking for html entities code in str
 ENTITY_DECODE:
 
 	if notproccnt > 3 {
@@ -965,7 +946,7 @@ ENTITY_DECODE:
 		str = html.UnescapeString(str)
 	}
 
-	//looking for html entities code in str
+	// looking for html entities code in str
 	retval = urlEncodedPattern.MatchString(str)
 	if retval {
 		tmpstr, err := url.QueryUnescape(str)
@@ -978,7 +959,7 @@ ENTITY_DECODE:
 			goto ENTITY_DECODE
 		} else {
 
-			//url.QueryUnescape not support UnicodeEntities
+			// url.QueryUnescape not support UnicodeEntities
 			tmpstr, err := s.DecodeURLEncoded(str)
 			if err == nil {
 				if tmpstr == str {
@@ -993,10 +974,10 @@ ENTITY_DECODE:
 	}
 END:
 
-	//remove tag elements
+	// remove tag elements
 	cleanedStr := tagElementsPattern.ReplaceAllString(str, "")
 
-	//remove multiple whitespace
+	// remove multiple whitespace
 	cleanedStr = whiteSpacePattern.ReplaceAllString(cleanedStr, "\n")
 
 	return cleanedStr, nil
@@ -1004,7 +985,6 @@ END:
 
 // ConvertToStr is Convert basic data type to string
 func (s *StringProc) ConvertToStr(obj interface{}) (string, error) {
-
 	switch obj.(type) {
 	case bool:
 		if obj.(bool) {
@@ -1019,7 +999,6 @@ func (s *StringProc) ConvertToStr(obj interface{}) (string, error) {
 
 // ConvertToArByte returns Convert basic data type to []byte
 func (s *StringProc) ConvertToArByte(obj interface{}) ([]byte, error) {
-
 	switch obj.(type) {
 
 	case bool:
@@ -1051,7 +1030,7 @@ func (s *StringProc) ConvertToArByte(obj interface{}) ([]byte, error) {
 		return []byte(strconv.FormatInt(obj.(int64), 10)), nil
 	case uint:
 		return []byte(strconv.FormatUint(uint64(obj.(uint)), 10)), nil
-	case uint8: //same byte
+	case uint8: // same byte
 		return []byte(strconv.FormatUint(uint64(obj.(uint8)), 10)), nil
 	case uint16:
 		return []byte(strconv.FormatUint(uint64(obj.(uint16)), 10)), nil
@@ -1092,7 +1071,6 @@ func (s *StringProc) ReverseStr(str string) string {
 
 // ReverseNormalStr is Reverse a None-unicode String
 func (s *StringProc) ReverseNormalStr(str string) string {
-
 	bufbyteStr := []byte(str)
 	bufbyteStrLen := len(bufbyteStr)
 	swapSize := int(math.Ceil(float64(bufbyteStrLen) / 2))
@@ -1110,7 +1088,6 @@ func (s *StringProc) ReverseNormalStr(str string) string {
 
 // ReverseUnicode is Reverse a unicode String
 func (s *StringProc) ReverseUnicode(str string) string {
-
 	bufRuneStr := []rune(str)
 	bufRuneStrl := len(bufRuneStr)
 	swapSize := int(math.Ceil(float64(bufRuneStrl) / 2))
@@ -1128,7 +1105,6 @@ func (s *StringProc) ReverseUnicode(str string) string {
 
 // FileMD5Hash is MD5 checksum of the file
 func (s *StringProc) FileMD5Hash(filepath string) (string, error) {
-
 	fd, err := os.Open(filepath)
 	if err != nil {
 		return "", err
@@ -1146,7 +1122,6 @@ func (s *StringProc) FileMD5Hash(filepath string) (string, error) {
 
 // MD5Hash is MD5 checksum of the string
 func (s *StringProc) MD5Hash(str string) (string, error) {
-
 	md5Hash := md5.New()
 	if _, err := io.WriteString(md5Hash, str); err != nil {
 		return "", err
@@ -1156,18 +1131,15 @@ func (s *StringProc) MD5Hash(str string) (string, error) {
 }
 
 func (s *StringProc) closeFd(fd *os.File) {
-
 	err := fd.Close()
 	if err != nil {
 		fmt.Printf("Error : %+v\n", err)
 	}
-
 }
 
 // RegExpNamedGroups is Captures the text matched by regex into the group name
 // NOTE : Not Support the Multiple Groups with The Same Name
 func (s *StringProc) RegExpNamedGroups(regex *regexp.Regexp, val string) (map[string]string, error) {
-
 	ok := false
 	err := errors.New("not all success patterns were matched")
 
