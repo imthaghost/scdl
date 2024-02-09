@@ -14,5 +14,5 @@ func (s *Soundcloud) GetClientID() (string, error) {
 	}
 
 	// return hardcoded client ID for now
-	return "nUB9ZvnjRiqKF43CkKf3iu69D8bboyKY", nil
+	return "vbQio6WOh4nNUyVjDdlg5sqdAigTAEzF", nil
 }
