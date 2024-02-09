@@ -6,6 +6,7 @@ import (
 	"golang.org/x/net/html"
 )
 
+// GetArtwork returns the artwork for the song
 func (s *Soundcloud) GetArtwork(doc *html.Node) (string, error) {
 	// XPath query
 	artworkPath := "//meta[@property='og:image']/@content"

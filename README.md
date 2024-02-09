@@ -61,13 +61,7 @@ go install
 scdl https://soundcloud.com/polo-g/polo-g-feat-juice-wrld-flex
 ```
 
-### Search
-```bash 
-# search flag
-scdl lucid dreams --search
-# or
-scdl lucid dreams -s
-```
+
 
 ## Todo
 
