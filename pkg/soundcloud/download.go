@@ -11,9 +11,7 @@ import (
 )
 
 // Download queries the SoundCloud api and receives a m3u8 file, then binds the segments received into a .mp3 file
-func Download(url string) {
-	// TODO: This client should be created higher up in the stack
-	soundcloud := NewClient()
+func (s *Soundcloud) Download(url string) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -21,9 +19,9 @@ func Download(url string) {
 	}
 
 	// set Non Hacker User Agent
-	req.Header.Set("Accept", soundcloud.userAgent)
+	req.Header.Set("Accept", s.UserAgent)
 
-	resp, err := soundcloud.Client.Do(req)
+	resp, err := s.Client.Do(req)
 	if err != nil {
 		log.Println(err)
 	}
@@ -34,17 +32,17 @@ func Download(url string) {
 		log.Println(err)
 	}
 
-	streamURL, err := soundcloud.ConstructStreamURL(doc)
+	streamURL, err := s.ConstructStreamURL(doc)
 	if err != nil {
 		log.Println(err)
 	}
 
-	songName, err := soundcloud.GetTitle(doc)
+	songName, err := s.GetTitle(doc)
 	if err != nil {
 		log.Println(err)
 	}
 
-	artwork, err := soundcloud.GetArtwork(doc)
+	artwork, err := s.GetArtwork(doc)
 	if err != nil {
 		log.Println(err)
 	}

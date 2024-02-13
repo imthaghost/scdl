@@ -7,7 +7,9 @@ import (
 func scdl(args []string) {
 	url := args[0]
 
-	// download song
-	soundcloud.Download(url)
+	// Create a new SoundCloud client
+	sc := soundcloud.NewClient("", nil)
+	// Download the song
+	sc.Download(url)
 
 }
