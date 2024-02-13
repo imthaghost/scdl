@@ -39,7 +39,8 @@ func Execute() {
 	// Persistent Flags
 	// TODO: implement search functionality
 	//rootCmd.PersistentFlags().BoolVarP(&Find, "search", "s", false, "Option for searching for songs")
-
+	// TODO: implement private downloads
+	//rootCmd.PersistentFlags().BoolVarP(&Private, "private", "p", false, "Option for downloading private songs")
 	// Execute the command :)
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

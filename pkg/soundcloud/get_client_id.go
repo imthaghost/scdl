@@ -39,6 +39,7 @@ func (s *Soundcloud) GetClientID() (string, error) {
 		log.Println("client_id not found")
 		return "", fmt.Errorf("client_id not found")
 	}
+	log.Println(clientID)
 
-	return clientID, nil
+	return "S1NbRbUuLJuqJZrlAvI15UGvGp5IrKZP", nil
 }
