@@ -3,6 +3,7 @@ package soundcloud
 import (
 	"fmt"
 	"golang.org/x/net/html"
+	"log"
 	"strings"
 )
 
@@ -21,11 +22,15 @@ func (s *Soundcloud) ConstructStreamURL(doc *html.Node) (string, error) {
 		return "", err
 	}
 
+	log.Println("trackAuth:", trackAuth)
+
 	// get hls stream url
 	hlsStreamURL, err := s.GetHLSURL(doc)
 	if err != nil {
 		return "", err
 	}
+
+	log.Println("hlsStreamURL:", hlsStreamURL)
 
 	trackID, streamToken, err := getTrackInfo(hlsStreamURL)
 

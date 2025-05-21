@@ -37,10 +37,14 @@ func (s *Soundcloud) Download(url string) {
 		log.Println(err)
 	}
 
+	log.Println("streamURL:", streamURL)
+
 	songName, err := s.GetTitle(doc)
 	if err != nil {
 		log.Println(err)
 	}
+
+	log.Println("songName:", songName)
 
 	artwork, err := s.GetArtwork(doc)
 	if err != nil {
@@ -50,7 +54,7 @@ func (s *Soundcloud) Download(url string) {
 	// Get the response from the URL
 	streamResp, err := http.Get(streamURL)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error getting response from stream URL:", err)
 		return
 	}
 	defer streamResp.Body.Close()
@@ -58,15 +62,17 @@ func (s *Soundcloud) Download(url string) {
 	// Read the body of the response
 	body, err := ioutil.ReadAll(streamResp.Body)
 	if err != nil {
-		log.Println("Error reading response body:", err)
+		log.Println("Error reading stream URL response body:", err)
 		return
 	}
+
+	log.Println("body:", string(body))
 
 	// Unmarshal the JSON into the struct
 	var audioResp AudioLink
 	err = json.Unmarshal(body, &audioResp)
 	if err != nil {
-		fmt.Println("Error unmarshalling JSON:", err)
+		fmt.Println("Error unmarshalling into audio response:", err)
 		return
 	}
 
