@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // Download queries the SoundCloud api and receives a m3u8 file, then binds the segments received into a .mp3 file
@@ -37,7 +38,10 @@ func (s *Soundcloud) Download(url string) {
 		log.Println(err)
 	}
 
+	// remove special characters from song name
+
 	songName, err := s.GetTitle(doc)
+	cleanedSongName := removeSpecialChars(songName)
 	if err != nil {
 		log.Println(err)
 	}
@@ -71,7 +75,7 @@ func (s *Soundcloud) Download(url string) {
 	}
 
 	// merge segments
-	mp3.Merge(audioResp.URL, songName)
+	mp3.Merge(audioResp.URL, cleanedSongName)
 
 	artworkResp, err := http.Get(artwork)
 	image, err := ioutil.ReadAll(artworkResp.Body)
@@ -80,5 +84,13 @@ func (s *Soundcloud) Download(url string) {
 	}
 
 	// set cover image for mp3 file
-	mp3.SetCoverImage(songName+".mp3", image)
+	mp3.SetCoverImage(cleanedSongName+".mp3", image)
+}
+
+func removeSpecialChars(s string) string {
+	// Remove special characters from the string
+	replacer := strings.NewReplacer(
+		"\\", "", "/", "", ":", "", "*", "", "?", "", "\"", "", "<", "", ">", "", "|", "", "+", "", "=", "", ",", "", ".", "", "!", "", "@", "", "#", "", "$", "", "%", "", "^", "", "&", "", "(", "", ")", "",
+	)
+	return replacer.Replace(s)
 }
