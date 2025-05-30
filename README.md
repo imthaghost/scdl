@@ -34,12 +34,8 @@ brew install scdl
 ### Manual
 
 ```bash
-# go get :)
-go get https://github.com/imthaghost/scdl
-# change to project directory using your GOPATH
-cd $GOPATH/src/github.com/imthaghost/scdl/cmd/scdl
-# build and install application
-go install
+# go install :)
+go install github.com/imthaghost/scdl/cmd/scdl@latest
 ```
 
 ### Binary

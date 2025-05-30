@@ -22,7 +22,7 @@ func (s *Soundcloud) GetClientID() (string, error) {
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("failed to read response body: %v", err)
+		log.Printf("failed to read response body: %v", err)
 		return "", fmt.Errorf("failed to read response body: %v", err)
 	}
 
@@ -49,7 +49,7 @@ func (s *Soundcloud) GetClientID() (string, error) {
 		// Read the response body
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			log.Fatalf("failed to read response body: %v", err)
+			log.Printf("failed to read response body: %v\n", err)
 			return "", fmt.Errorf("failed to read response body: %v", err)
 		}
 
