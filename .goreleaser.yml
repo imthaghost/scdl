@@ -13,7 +13,7 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
-    main: ./cmd/scdl/main.go
+    main: ./
     binary: scdl
 
 # Archive configurations
