@@ -62,7 +62,7 @@ func TestHTTPGetBytes(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/ok":
-			w.Write([]byte("hello world"))
+			_, _ = w.Write([]byte("hello world"))
 		case "/boom":
 			http.Error(w, "nope", http.StatusInternalServerError)
 		}
@@ -86,7 +86,7 @@ func TestKeyCacheMemoizes(t *testing.T) {
 	var hits int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt32(&hits, 1)
-		w.Write([]byte("0123456789abcdef"))
+		_, _ = w.Write([]byte("0123456789abcdef"))
 	}))
 	defer srv.Close()
 

@@ -77,17 +77,17 @@ func TestMetaContent(t *testing.T) {
 	}
 }
 
-func TestFindSoundHydration(t *testing.T) {
+func TestFindHydration(t *testing.T) {
 	doc := parseFixture(t, trackHTMLFixture)
-	sound, err := findSoundHydration(doc, "//script[contains(text(), 'track_authorization')]")
+	sound, err := findHydration(doc, "//script[contains(text(), 'track_authorization')]", "sound")
 	if err != nil {
-		t.Fatalf("findSoundHydration: %v", err)
+		t.Fatalf("findHydration sound: %v", err)
 	}
 	if got, _ := sound["track_authorization"].(string); got != "AUTH_TOKEN_123" {
 		t.Errorf("track_authorization = %q, want %q", got, "AUTH_TOKEN_123")
 	}
 
-	if _, err := findSoundHydration(parseFixture(t, playlistHTMLFixture), "//script[contains(text(), 'hydration')]"); err == nil {
+	if _, err := findHydration(parseFixture(t, playlistHTMLFixture), "//script[contains(text(), 'hydration')]", "sound"); err == nil {
 		t.Error("expected error when no sound entry is present, got nil")
 	}
 }

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -12,23 +14,61 @@ const (
 	authHeaderValue = "OAuth "
 )
 
+// Options bundles user-facing configuration for a Soundcloud client.
+type Options struct {
+	// Token is an optional SoundCloud OAuth token. When set, it's attached as
+	// "Authorization: OAuth <token>" on api-v2 requests and as the oauth_token
+	// cookie on page requests so the scraped track_authorization JWT carries
+	// the user's sub (required for Go+ HQ and private tracks).
+	Token string
+
+	// OutputDir is the directory where downloaded mp3s are written. Empty
+	// means the current working directory.
+	OutputDir string
+
+	// ProxyURL, when set, is parsed and used as the HTTP/HTTPS proxy for all
+	// requests. Empty falls back to Go's default ProxyFromEnvironment behavior
+	// (HTTPS_PROXY / HTTP_PROXY / NO_PROXY env vars are honored).
+	ProxyURL string
+}
+
 // Soundcloud is an HTTP client for scraping and downloading SoundCloud tracks.
-//
-// Token is an optional SoundCloud OAuth token. When set, it's attached as
-// "Authorization: OAuth <token>" on requests to api-v2.soundcloud.com, which
-// unlocks Go+ high-quality transcodings and private tracks the account has
-// access to.
 type Soundcloud struct {
 	Client    *http.Client
 	UserAgent string
 	Token     string
+	OutputDir string
 }
 
-func NewClient(httpClient *http.Client, token string) *Soundcloud {
-	if httpClient == nil {
-		httpClient = &http.Client{}
+// NewClient builds a Soundcloud configured from opts. Returns an error if the
+// proxy URL is malformed.
+func NewClient(opts Options) (*Soundcloud, error) {
+	transport, err := buildTransport(opts.ProxyURL)
+	if err != nil {
+		return nil, err
 	}
-	return &Soundcloud{Client: httpClient, UserAgent: userAgent, Token: token}
+	return &Soundcloud{
+		Client:    &http.Client{Transport: transport},
+		UserAgent: userAgent,
+		Token:     opts.Token,
+		OutputDir: opts.OutputDir,
+	}, nil
+}
+
+// buildTransport returns an http.Transport that uses proxyURL when non-empty,
+// or Go's default proxy-from-environment behavior otherwise.
+func buildTransport(proxyURL string) (*http.Transport, error) {
+	t := http.DefaultTransport.(*http.Transport).Clone()
+	if proxyURL == "" {
+		t.Proxy = http.ProxyFromEnvironment
+		return t, nil
+	}
+	parsed, err := url.Parse(proxyURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid proxy URL %q: %w", proxyURL, err)
+	}
+	t.Proxy = http.ProxyURL(parsed)
+	return t, nil
 }
 
 // authedGet performs a GET request, attaching the OAuth header only when the

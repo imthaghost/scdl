@@ -14,18 +14,35 @@ import (
 )
 
 var (
-	assetURLRe    = regexp.MustCompile(`src="(https:\/\/a-v2\.sndcdn\.com\/assets\/[^\s"]+)"`)
-	clientIDRe    = regexp.MustCompile(`client_id:\"([^\"]+)\"`)
-	hydrationRe   = regexp.MustCompile(`window\.__sc_hydration\s*=\s*(\[{.*?\}]);`)
-	secretPathRe  = regexp.MustCompile(`/s-[A-Za-z0-9]+$`)
-	errHydrationN = errors.New("__sc_hydration sound entry not found")
+	assetURLRe   = regexp.MustCompile(`src="(https:\/\/a-v2\.sndcdn\.com\/assets\/[^\s"]+)"`)
+	clientIDRe   = regexp.MustCompile(`client_id:\"([^\"]+)\"`)
+	hydrationRe  = regexp.MustCompile(`window\.__sc_hydration\s*=\s*(\[{.*?\}]);`)
+	secretPathRe = regexp.MustCompile(`/s-[A-Za-z0-9]+$`)
+
+	errSoundNotFound    = errors.New("__sc_hydration sound entry not found")
+	errPlaylistNotFound = errors.New("__sc_hydration playlist entry not found")
 )
 
 // hlsTranscoding is the chosen audio source for a track: its API URL plus the
 // quality label SoundCloud advertises so we can report it back to the user.
 type hlsTranscoding struct {
 	URL     string
-	Quality string // "hq" (Go+) or "sq" (standard)
+	Quality string // "hq" (Go+), "sq" (standard), or "lq"
+}
+
+// playlistInfo is the subset of playlist hydration we care about: a title for
+// the output subdirectory and a list of constituent tracks.
+type playlistInfo struct {
+	Title  string
+	Tracks []playlistTrack
+}
+
+// playlistTrack is one entry in a playlist. PermalinkURL may be empty when the
+// hydration only included the track ID (a "stub"); call resolveStubs to fill
+// those in via api-v2.
+type playlistTrack struct {
+	ID           int64
+	PermalinkURL string
 }
 
 // GetClientID scrapes a fresh client_id by following the JS asset bundles
@@ -83,7 +100,7 @@ func (s *Soundcloud) GetArtwork(doc *html.Node) (string, error) {
 // The page only advertises hq when the request is authenticated with a Go+
 // token (via the oauth_token cookie on the page fetch).
 func (s *Soundcloud) GetHLSTranscoding(doc *html.Node) (hlsTranscoding, error) {
-	sound, err := findSoundHydration(doc, "//script[contains(text(), 'media') and contains(text(), 'transcodings')]")
+	sound, err := findHydration(doc, "//script[contains(text(), 'media') and contains(text(), 'transcodings')]", "sound")
 	if err != nil {
 		return hlsTranscoding{}, err
 	}
@@ -138,7 +155,7 @@ func qualityScore(q string) int {
 // GetTrackAuthorization extracts the per-track authorization token from the
 // page's hydration data.
 func (s *Soundcloud) GetTrackAuthorization(doc *html.Node) (string, error) {
-	sound, err := findSoundHydration(doc, "//script[contains(text(), 'track_authorization')]")
+	sound, err := findHydration(doc, "//script[contains(text(), 'track_authorization')]", "sound")
 	if err != nil {
 		return "", err
 	}
@@ -146,6 +163,96 @@ func (s *Soundcloud) GetTrackAuthorization(doc *html.Node) (string, error) {
 		return ta, nil
 	}
 	return "", errors.New("track_authorization not found")
+}
+
+// GetPlaylist extracts the playlist title and constituent track URLs from the
+// page's hydration data. Returns errPlaylistNotFound when the page isn't a
+// playlist (e.g., a single track URL).
+func (s *Soundcloud) GetPlaylist(doc *html.Node) (*playlistInfo, error) {
+	data, err := findHydration(doc, "//script[contains(text(), '__sc_hydration')]", "playlist")
+	if err != nil {
+		return nil, err
+	}
+	title, _ := data["title"].(string)
+	rawTracks, _ := data["tracks"].([]interface{})
+	tracks := make([]playlistTrack, 0, len(rawTracks))
+	for _, t := range rawTracks {
+		tm, ok := t.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		var id int64
+		switch v := tm["id"].(type) {
+		case float64:
+			id = int64(v)
+		case json.Number:
+			id, _ = v.Int64()
+		}
+		permalink, _ := tm["permalink_url"].(string)
+		tracks = append(tracks, playlistTrack{ID: id, PermalinkURL: permalink})
+	}
+	return &playlistInfo{Title: title, Tracks: tracks}, nil
+}
+
+// stubBatchSize caps how many track IDs we send per api-v2 /tracks request.
+// Empirically SoundCloud rejects much larger batches with 400.
+const stubBatchSize = 50
+
+// resolveStubs replaces any tracks in p whose PermalinkURL is empty with
+// fully-resolved entries from api-v2 /tracks?ids=. Stubs occur when the
+// playlist hydration only included track IDs. Requests are batched to stay
+// under URL-length limits.
+func (s *Soundcloud) resolveStubs(p *playlistInfo, clientID string) error {
+	var stubIDs []string
+	for _, t := range p.Tracks {
+		if t.PermalinkURL == "" && t.ID != 0 {
+			stubIDs = append(stubIDs, fmt.Sprintf("%d", t.ID))
+		}
+	}
+	if len(stubIDs) == 0 {
+		return nil
+	}
+
+	byID := make(map[int64]string)
+	for i := 0; i < len(stubIDs); i += stubBatchSize {
+		end := i + stubBatchSize
+		if end > len(stubIDs) {
+			end = len(stubIDs)
+		}
+		if err := s.fetchTracksBatch(stubIDs[i:end], clientID, byID); err != nil {
+			return err
+		}
+	}
+	for i := range p.Tracks {
+		if p.Tracks[i].PermalinkURL == "" {
+			p.Tracks[i].PermalinkURL = byID[p.Tracks[i].ID]
+		}
+	}
+	return nil
+}
+
+func (s *Soundcloud) fetchTracksBatch(ids []string, clientID string, out map[int64]string) error {
+	apiURL := fmt.Sprintf("https://api-v2.soundcloud.com/tracks?ids=%s&client_id=%s",
+		strings.Join(ids, ","), url.QueryEscape(clientID))
+	resp, err := s.authedGet(apiURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode/100 != 2 {
+		return fmt.Errorf("api-v2 /tracks returned %d (batch of %d ids)", resp.StatusCode, len(ids))
+	}
+	var resolved []struct {
+		ID           int64  `json:"id"`
+		PermalinkURL string `json:"permalink_url"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&resolved); err != nil {
+		return fmt.Errorf("decode /tracks response: %w", err)
+	}
+	for _, r := range resolved {
+		out[r.ID] = r.PermalinkURL
+	}
+	return nil
 }
 
 // ConstructStreamURL takes the picked transcoding URL from the page and
@@ -204,9 +311,21 @@ func extractSecretToken(rawURL string) (cleaned, secret string, err error) {
 	return rawURL, "", nil
 }
 
-// findSoundHydration runs the given XPath, scans matching <script> nodes for
-// window.__sc_hydration, and returns the `data` map of the "sound" entry.
-func findSoundHydration(doc *html.Node, xpath string) (map[string]interface{}, error) {
+// isPlaylistURL is a fast check used to route Download. SoundCloud playlist
+// URLs always contain /sets/ in the path (both user playlists and the
+// algorithmically-curated /discover/sets/...).
+func isPlaylistURL(rawURL string) bool {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return false
+	}
+	return strings.Contains(u.Path, "/sets/")
+}
+
+// findHydration scans <script> nodes matching xpath for the
+// window.__sc_hydration array and returns the data map of the first entry
+// whose "hydratable" equals the given type.
+func findHydration(doc *html.Node, xpath, hydratable string) (map[string]interface{}, error) {
 	nodes, err := htmlquery.QueryAll(doc, xpath)
 	if err != nil {
 		return nil, fmt.Errorf("xpath %q: %w", xpath, err)
@@ -221,15 +340,22 @@ func findSoundHydration(doc *html.Node, xpath string) (map[string]interface{}, e
 			return nil, fmt.Errorf("parse hydration json: %w", err)
 		}
 		for _, item := range data {
-			if item["hydratable"] != "sound" {
+			if item["hydratable"] != hydratable {
 				continue
 			}
-			if sound, ok := item["data"].(map[string]interface{}); ok {
-				return sound, nil
+			if d, ok := item["data"].(map[string]interface{}); ok {
+				return d, nil
 			}
 		}
 	}
-	return nil, errHydrationN
+	switch hydratable {
+	case "sound":
+		return nil, errSoundNotFound
+	case "playlist":
+		return nil, errPlaylistNotFound
+	default:
+		return nil, fmt.Errorf("__sc_hydration %q entry not found", hydratable)
+	}
 }
 
 // metaContent reads <meta property="…" content="…"> from the parsed doc.
@@ -244,4 +370,3 @@ func metaContent(doc *html.Node, property string) (string, error) {
 	}
 	return htmlquery.InnerText(nodes[0]), nil
 }
-

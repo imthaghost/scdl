@@ -44,11 +44,14 @@ func TestAuthedGetAttachesOAuthHeaderOnlyForAPIV2(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			var seen *http.Request
-			httpClient := &http.Client{Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+			s, err := NewClient(Options{Token: tc.token})
+			if err != nil {
+				t.Fatal(err)
+			}
+			s.Client.Transport = roundTripFunc(func(req *http.Request) (*http.Response, error) {
 				seen = req
 				return &http.Response{StatusCode: 200, Body: http.NoBody, Header: make(http.Header)}, nil
-			})}
-			s := NewClient(httpClient, tc.token)
+			})
 			resp, err := s.authedGet(tc.url)
 			if err != nil {
 				t.Fatalf("authedGet: %v", err)
@@ -65,15 +68,71 @@ func TestAuthedGetAttachesOAuthHeaderOnlyForAPIV2(t *testing.T) {
 	}
 }
 
+func TestNewClientProxyURL(t *testing.T) {
+	t.Run("valid proxy URL", func(t *testing.T) {
+		s, err := NewClient(Options{ProxyURL: "http://proxy.example.com:3128"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		tr, ok := s.Client.Transport.(*http.Transport)
+		if !ok {
+			t.Fatalf("transport = %T, want *http.Transport", s.Client.Transport)
+		}
+		if tr.Proxy == nil {
+			t.Fatal("transport.Proxy is nil; expected ProxyURL set")
+		}
+		// Probe the proxy func with a dummy request.
+		req, _ := http.NewRequest("GET", "https://soundcloud.com", nil)
+		u, err := tr.Proxy(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if u == nil || u.Host != "proxy.example.com:3128" {
+			t.Errorf("proxy host = %v, want proxy.example.com:3128", u)
+		}
+	})
+
+	t.Run("empty proxy URL falls back to ProxyFromEnvironment", func(t *testing.T) {
+		s, err := NewClient(Options{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		tr := s.Client.Transport.(*http.Transport)
+		if tr.Proxy == nil {
+			t.Error("transport.Proxy should default to ProxyFromEnvironment, not nil")
+		}
+	})
+
+	t.Run("malformed proxy URL surfaces error", func(t *testing.T) {
+		if _, err := NewClient(Options{ProxyURL: "://not a url"}); err == nil {
+			t.Error("expected error for malformed proxy, got nil")
+		}
+	})
+}
+
+func TestNewClientStoresOutputDir(t *testing.T) {
+	s, err := NewClient(Options{OutputDir: "/tmp/scdl-out"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s.OutputDir != "/tmp/scdl-out" {
+		t.Errorf("OutputDir = %q, want %q", s.OutputDir, "/tmp/scdl-out")
+	}
+}
+
 // TestAuthedGetEndToEnd uses a real httptest server to make sure the request
 // actually goes through (no transport oddities) and the body is readable.
 func TestAuthedGetEndToEnd(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ok"))
+		_, _ = w.Write([]byte("ok"))
 	}))
 	defer srv.Close()
 
-	resp, err := NewClient(http.DefaultClient, "").authedGet(srv.URL)
+	sc, err := NewClient(Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := sc.authedGet(srv.URL)
 	if err != nil {
 		t.Fatal(err)
 	}

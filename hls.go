@@ -32,9 +32,17 @@ var (
 
 // downloadHLS fetches every segment of the HLS playlist at playlistURL,
 // decrypts them if AES-128 keys are present, and writes the assembled bytes
-// to outPath.
-func downloadHLS(playlistURL, outPath string) error {
-	client := &http.Client{Timeout: hlsHTTPTimeout}
+// to outPath. Uses the Soundcloud client's Transport (proxy-aware) but with
+// a per-request timeout suitable for short segment fetches.
+func (s *Soundcloud) downloadHLS(playlistURL, outPath string) error {
+	client := *s.Client
+	client.Timeout = hlsHTTPTimeout
+	return downloadHLSWith(&client, playlistURL, outPath)
+}
+
+// downloadHLSWith is the actual implementation, parameterized over the
+// http.Client so tests can swap in a mock.
+func downloadHLSWith(client *http.Client, playlistURL, outPath string) error {
 
 	mpl, err := fetchMediaPlaylist(client, playlistURL)
 	if err != nil {
