@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"net/http"
@@ -69,7 +70,7 @@ func TestHTTPGetBytes(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	body, err := httpGetBytes(http.DefaultClient, srv.URL+"/ok")
+	body, err := httpGetBytes(context.Background(), http.DefaultClient, srv.URL+"/ok")
 	if err != nil {
 		t.Fatalf("ok request: %v", err)
 	}
@@ -77,7 +78,7 @@ func TestHTTPGetBytes(t *testing.T) {
 		t.Errorf("body = %q, want %q", body, "hello world")
 	}
 
-	if _, err := httpGetBytes(http.DefaultClient, srv.URL+"/boom"); err == nil {
+	if _, err := httpGetBytes(context.Background(), http.DefaultClient, srv.URL+"/boom"); err == nil {
 		t.Error("expected error from 500 response, got nil")
 	}
 }
@@ -92,7 +93,7 @@ func TestKeyCacheMemoizes(t *testing.T) {
 
 	kc := newKeyCache(http.DefaultClient)
 	for i := 0; i < 5; i++ {
-		got, err := kc.get(srv.URL + "/key")
+		got, err := kc.get(context.Background(), srv.URL+"/key")
 		if err != nil {
 			t.Fatalf("kc.get: %v", err)
 		}

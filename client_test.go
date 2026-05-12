@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 // roundTripFunc lets us intercept requests without spinning up a real server,
@@ -52,7 +54,7 @@ func TestAuthedGetAttachesOAuthHeaderOnlyForAPIV2(t *testing.T) {
 				seen = req
 				return &http.Response{StatusCode: 200, Body: http.NoBody, Header: make(http.Header)}, nil
 			})
-			resp, err := s.authedGet(tc.url)
+			resp, err := s.authedGet(context.Background(), tc.url)
 			if err != nil {
 				t.Fatalf("authedGet: %v", err)
 			}
@@ -132,12 +134,49 @@ func TestAuthedGetEndToEnd(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err := sc.authedGet(srv.URL)
+	resp, err := sc.authedGet(context.Background(), srv.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
 		t.Errorf("status = %d, want 200", resp.StatusCode)
+	}
+}
+
+// TestAuthedGetCancellation verifies that cancelling the context aborts an
+// in-flight request rather than hanging.
+func TestAuthedGetCancellation(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Block until the client disconnects (i.e. ctx is cancelled).
+		<-r.Context().Done()
+	}))
+	defer srv.Close()
+
+	sc, err := NewClient(Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	errCh := make(chan error, 1)
+	go func() {
+		_, err := sc.authedGet(ctx, srv.URL)
+		errCh <- err
+	}()
+
+	time.Sleep(20 * time.Millisecond)
+	cancel()
+
+	select {
+	case err := <-errCh:
+		if err == nil {
+			t.Fatal("expected error after cancel, got nil")
+		}
+		if !strings.Contains(err.Error(), "context canceled") {
+			t.Errorf("error = %q, want one mentioning context canceled", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("authedGet did not return after cancel; request did not respect ctx")
 	}
 }

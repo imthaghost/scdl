@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -79,15 +80,16 @@ func TestMetaContent(t *testing.T) {
 
 func TestFindHydration(t *testing.T) {
 	doc := parseFixture(t, trackHTMLFixture)
-	sound, err := findHydration(doc, "//script[contains(text(), 'track_authorization')]", "sound")
-	if err != nil {
+	var sd soundData
+	if err := findHydration(doc, "//script[contains(text(), 'track_authorization')]", "sound", &sd); err != nil {
 		t.Fatalf("findHydration sound: %v", err)
 	}
-	if got, _ := sound["track_authorization"].(string); got != "AUTH_TOKEN_123" {
-		t.Errorf("track_authorization = %q, want %q", got, "AUTH_TOKEN_123")
+	if sd.TrackAuthorization != "AUTH_TOKEN_123" {
+		t.Errorf("track_authorization = %q, want %q", sd.TrackAuthorization, "AUTH_TOKEN_123")
 	}
 
-	if _, err := findHydration(parseFixture(t, playlistHTMLFixture), "//script[contains(text(), 'hydration')]", "sound"); err == nil {
+	var sd2 soundData
+	if err := findHydration(parseFixture(t, playlistHTMLFixture), "//script[contains(text(), 'hydration')]", "sound", &sd2); err == nil {
 		t.Error("expected error when no sound entry is present, got nil")
 	}
 }
@@ -216,5 +218,37 @@ func TestFilenameSanitizer(t *testing.T) {
 		if got := filenameSanitizer.Replace(tt.in); got != tt.want {
 			t.Errorf("Replace(%q) = %q, want %q", tt.in, got, tt.want)
 		}
+	}
+}
+
+// TestGetClientIDIsCached locks in the sync.Once contract: the underlying
+// fetch runs at most once per Soundcloud value, no matter how many tracks
+// call GetClientID. We can't easily mock the homepage URL (it's hardcoded),
+// so we seed the cache via Once.Do directly and verify subsequent calls
+// don't re-invoke.
+func TestGetClientIDIsCached(t *testing.T) {
+	sc, err := NewClient(Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	const fakeClientID = "TEST_CID_12345"
+	calls := 0
+	sc.clientIDOnce.Do(func() {
+		calls++
+		sc.clientIDVal = fakeClientID
+	})
+
+	for i := 0; i < 5; i++ {
+		got, err := sc.GetClientID(context.Background())
+		if err != nil {
+			t.Fatalf("call %d: %v", i, err)
+		}
+		if got != fakeClientID {
+			t.Errorf("call %d: clientID = %q, want %q", i, got, fakeClientID)
+		}
+	}
+	if calls != 1 {
+		t.Errorf("inner fetcher invoked %d times, want 1", calls)
 	}
 }

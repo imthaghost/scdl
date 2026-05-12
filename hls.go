@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
@@ -18,6 +19,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/grafov/m3u8"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -34,17 +36,20 @@ var (
 // decrypts them if AES-128 keys are present, and writes the assembled bytes
 // to outPath. Uses the Soundcloud client's Transport (proxy-aware) but with
 // a per-request timeout suitable for short segment fetches.
-func (s *Soundcloud) downloadHLS(playlistURL, outPath string) error {
+//
+// If any segment fails (fetch, decrypt, or context cancellation), in-flight
+// downloads are cancelled and the output file is not written, so we never
+// produce a silently-corrupt mp3.
+func (s *Soundcloud) downloadHLS(ctx context.Context, playlistURL, outPath string) error {
 	client := *s.Client
 	client.Timeout = hlsHTTPTimeout
-	return downloadHLSWith(&client, playlistURL, outPath)
+	return downloadHLSWith(ctx, &client, playlistURL, outPath)
 }
 
 // downloadHLSWith is the actual implementation, parameterized over the
 // http.Client so tests can swap in a mock.
-func downloadHLSWith(client *http.Client, playlistURL, outPath string) error {
-
-	mpl, err := fetchMediaPlaylist(client, playlistURL)
+func downloadHLSWith(ctx context.Context, client *http.Client, playlistURL, outPath string) error {
+	mpl, err := fetchMediaPlaylist(ctx, client, playlistURL)
 	if err != nil {
 		return fmt.Errorf("parse m3u8: %w", err)
 	}
@@ -56,30 +61,27 @@ func downloadHLSWith(client *http.Client, playlistURL, outPath string) error {
 	segments := make([][]byte, count)
 	keys := newKeyCache(client)
 
-	sem := make(chan struct{}, hlsConcurrency)
-	var wg sync.WaitGroup
+	g, gctx := errgroup.WithContext(ctx)
+	g.SetLimit(hlsConcurrency)
 	for i := 0; i < count; i++ {
-		wg.Add(1)
-		sem <- struct{}{}
-		go func(idx int) {
-			defer wg.Done()
-			defer func() { <-sem }()
-
+		idx := i
+		g.Go(func() error {
 			seg := mpl.Segments[idx]
-			data, err := fetchSegment(client, seg)
+			data, err := fetchSegment(gctx, client, seg)
 			if err != nil {
-				fmt.Printf("%s Segment %d fetch failed: %s\n", red("[-]"), idx, err)
-				return
+				return fmt.Errorf("segment %d fetch: %w", idx, err)
 			}
-			data, err = maybeDecrypt(data, idx, seg, mpl.Key, keys)
+			data, err = maybeDecrypt(gctx, data, idx, seg, mpl.Key, keys)
 			if err != nil {
-				fmt.Printf("%s Segment %d decrypt failed: %s\n", red("[-]"), idx, err)
-				return
+				return fmt.Errorf("segment %d decrypt: %w", idx, err)
 			}
 			segments[idx] = data
-		}(i)
+			return nil
+		})
 	}
-	wg.Wait()
+	if err := g.Wait(); err != nil {
+		return err
+	}
 
 	out, err := writeSegments(outPath, segments)
 	if err != nil {
@@ -91,8 +93,8 @@ func downloadHLSWith(client *http.Client, playlistURL, outPath string) error {
 
 // fetchMediaPlaylist downloads and decodes the m3u8 at u, resolving any
 // relative key and segment URIs against the playlist URL.
-func fetchMediaPlaylist(client *http.Client, u string) (*m3u8.MediaPlaylist, error) {
-	body, err := httpGetBytes(client, u)
+func fetchMediaPlaylist(ctx context.Context, client *http.Client, u string) (*m3u8.MediaPlaylist, error) {
+	body, err := httpGetBytes(ctx, client, u)
 	if err != nil {
 		return nil, err
 	}
@@ -130,8 +132,8 @@ func fetchMediaPlaylist(client *http.Client, u string) (*m3u8.MediaPlaylist, err
 	return mpl, nil
 }
 
-func fetchSegment(client *http.Client, seg *m3u8.MediaSegment) ([]byte, error) {
-	data, err := httpGetBytes(client, seg.URI)
+func fetchSegment(ctx context.Context, client *http.Client, seg *m3u8.MediaSegment) ([]byte, error) {
+	data, err := httpGetBytes(ctx, client, seg.URI)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +145,7 @@ func fetchSegment(client *http.Client, seg *m3u8.MediaSegment) ([]byte, error) {
 
 // maybeDecrypt applies AES-CBC decryption when the segment (or playlist) has a
 // key URI. iv defaults to the segment index when not declared.
-func maybeDecrypt(data []byte, idx int, seg *m3u8.MediaSegment, globalKey *m3u8.Key, keys *keyCache) ([]byte, error) {
+func maybeDecrypt(ctx context.Context, data []byte, idx int, seg *m3u8.MediaSegment, globalKey *m3u8.Key, keys *keyCache) ([]byte, error) {
 	keyURL, ivStr := "", ""
 	switch {
 	case seg.Key != nil && seg.Key.URI != "":
@@ -154,7 +156,7 @@ func maybeDecrypt(data []byte, idx int, seg *m3u8.MediaSegment, globalKey *m3u8.
 		return data, nil
 	}
 
-	key, err := keys.get(keyURL)
+	key, err := keys.get(ctx, keyURL)
 	if err != nil {
 		return nil, fmt.Errorf("fetch key %s: %w", keyURL, err)
 	}
@@ -172,7 +174,7 @@ func maybeDecrypt(data []byte, idx int, seg *m3u8.MediaSegment, globalKey *m3u8.
 }
 
 func writeSegments(path string, segments [][]byte) (string, error) {
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
 	if err != nil {
 		return "", err
 	}
@@ -197,8 +199,12 @@ func absoluteURL(base *url.URL, u string) (string, error) {
 	return parsed.String(), nil
 }
 
-func httpGetBytes(client *http.Client, u string) ([]byte, error) {
-	resp, err := client.Get(u)
+func httpGetBytes(ctx context.Context, client *http.Client, u string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -224,13 +230,13 @@ func newKeyCache(client *http.Client) *keyCache {
 	return &keyCache{client: client, cache: map[string][]byte{}}
 }
 
-func (k *keyCache) get(u string) ([]byte, error) {
+func (k *keyCache) get(ctx context.Context, u string) ([]byte, error) {
 	k.mu.Lock()
 	defer k.mu.Unlock()
 	if v, ok := k.cache[u]; ok {
 		return v, nil
 	}
-	key, err := httpGetBytes(k.client, u)
+	key, err := httpGetBytes(ctx, k.client, u)
 	if err != nil {
 		return nil, err
 	}

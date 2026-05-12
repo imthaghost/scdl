@@ -1,8 +1,12 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/spf13/cobra"
 )
@@ -45,16 +49,30 @@ Authorization request header.`,
 		if err != nil {
 			return err
 		}
-		return sc.Download(args[0])
+		return sc.Download(cmd.Context(), args[0])
 	},
 }
 
 func main() {
+	// SIGINT (Ctrl-C) / SIGTERM cancel the root context, which all in-flight
+	// HTTP requests inherit via NewRequestWithContext. The errgroup wrapping
+	// HLS segment fetches stops promptly, and the binary exits with 130 (the
+	// conventional SIGINT exit code).
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
 	rootCmd.Flags().StringVar(&flagToken, "token", "", "SoundCloud OAuth token (overrides $"+tokenEnvVar+")")
 	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", "", "output directory (default: current directory)")
 	rootCmd.Flags().StringVar(&flagProxy, "proxy", "", "proxy URL, e.g. http://user:pass@host:port (defaults to $HTTPS_PROXY/$HTTP_PROXY)")
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, "scdl:", err)
-		os.Exit(1)
+
+	err := rootCmd.ExecuteContext(ctx)
+	if err == nil {
+		return
 	}
+	if errors.Is(err, context.Canceled) {
+		fmt.Fprintln(os.Stderr, "scdl: interrupted")
+		os.Exit(130)
+	}
+	fmt.Fprintln(os.Stderr, "scdl:", err)
+	os.Exit(1)
 }

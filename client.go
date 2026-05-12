@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 )
 
 const (
@@ -38,6 +40,14 @@ type Soundcloud struct {
 	UserAgent string
 	Token     string
 	OutputDir string
+
+	// clientID is fetched lazily on first use and memoized for the lifetime
+	// of the Soundcloud value. Scraping it costs a homepage request plus up
+	// to ~10 multi-megabyte asset bundle fetches, so doing it once is a big
+	// win for playlist downloads.
+	clientIDOnce sync.Once
+	clientIDVal  string
+	clientIDErr  error
 }
 
 // NewClient builds a Soundcloud configured from opts. Returns an error if the
@@ -71,11 +81,11 @@ func buildTransport(proxyURL string) (*http.Transport, error) {
 	return t, nil
 }
 
-// authedGet performs a GET request, attaching the OAuth header only when the
-// URL targets api-v2.soundcloud.com and a token is configured. Other hosts
-// (the page itself, CDN segments, asset bundles) don't accept the header.
-func (s *Soundcloud) authedGet(rawURL string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", rawURL, nil)
+// authedGet performs a GET, attaching the OAuth header only when the URL
+// targets api-v2.soundcloud.com and a token is configured. The request is
+// bound to ctx so cancellation aborts in-flight calls.
+func (s *Soundcloud) authedGet(ctx context.Context, rawURL string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", rawURL, nil)
 	if err != nil {
 		return nil, err
 	}
